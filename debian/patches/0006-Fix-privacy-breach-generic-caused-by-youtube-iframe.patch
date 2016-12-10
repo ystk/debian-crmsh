@@ -1,0 +1,26 @@
+From: Richard B Winters <rik@mmogp.com>
+Date: Fri, 29 Jan 2016 11:26:22 -0500
+Subject: Fix privacy-breach-generic caused by youtube iframe
+
+ - Modified 2015-05-13-releaswe-2_1_4.adoc so as not to 
+   embed the youtube video
+
+Change-Id: Iaaf487ace95f5c5b02ba5f89d796e08e9abab4fd
+Signed-off-by: Richard B Winters <rik@mmogp.com>
+---
+ doc/website-v1/news/2015-05-13-release-2_1_4.adoc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/website-v1/news/2015-05-13-release-2_1_4.adoc b/doc/website-v1/news/2015-05-13-release-2_1_4.adoc
+index 31297cf..e1dc9df 100644
+--- a/doc/website-v1/news/2015-05-13-release-2_1_4.adoc
++++ b/doc/website-v1/news/2015-05-13-release-2_1_4.adoc
+@@ -50,7 +50,7 @@ builds upon the crmsh history feature at openSUSE conf in The Hague
+ earlier this month. The video of that presentation is online here:
+ 
+ ++++++++++++
+-<iframe width="420" height="315" src="https://www.youtube.com/embed/mngfxzXkFLw" frameborder="0" allowfullscreen></iframe>
++<iframe width="420" height="315" src="/" frameborder="0" allowfullscreen></iframe>
+ ++++++++++++
+ 
+ https://www.youtube.com/watch?v=mngfxzXkFLw

@@ -1,0 +1,74 @@
+Source: crmsh
+Section: admin
+Priority: extra
+Maintainer: Debian HA Maintainers <debian-ha-maintainers@lists.alioth.debian.org>
+Uploaders: Martin Loschwitz <madkiss@debian.org>,
+ Richard B Winters <rik@mmogp.com>,
+ Christoph Berg <myon@debian.org>
+Build-Depends: debhelper (>= 9.0.0),
+ asciidoc,
+ autotools-dev,
+ cluster-glue-dev,
+ dh-autoreconf,
+ dh-python,
+ docbook-xml,
+ docbook-xsl,
+ libcib-dev (>= 1.1.12),
+ libcrmcluster-dev (>= 1.1.12),
+ libcrmcommon-dev (>= 1.1.12),
+ libcrmservice-dev (>= 1.1.12),
+ liblrm2-dev (>= 1.0.12~),
+ liblrmd-dev (>= 1.1.12),
+ libpengine-dev (>= 1.1.12),
+ libpils2-dev (>= 1.0.12~),
+ libplumb2-dev (>= 1.0.12~),
+ libplumbgpl2-dev (>= 1.0.12~),
+ libstonith1-dev (>= 1.0.12~),
+ libstonithd-dev (>= 1.1.14),
+ libxml2-utils,
+ pkg-config,
+ python-all (>= 2.6.6-3~),
+ python-all-dev,
+ python-dateutil,
+ python-setuptools,
+ xsltproc
+Standards-Version: 3.9.6
+Homepage: http://crmsh.github.io/
+Vcs-Git: https://alioth.debian.org/anonscm/git/debian-ha/crmsh.git
+Vcs-Browser: http://anonscm.debian.org/cgit/debian-ha/crmsh.git
+
+Package: crmsh
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${python:Depends},
+ ${misc:Depends},
+ pacemaker-cli-utils,
+ python2.7 (>=2.7.9),
+ python-lxml,
+ python-yaml
+Recommends: pacemaker (>= 1.1.12)
+Replaces: pacemaker (<< 1.1.12)
+Breaks: pacemaker (<< 1.1.12)
+Description: CRM shell for the pacemaker cluster manager
+ The crm shell is an advanced command-line interface for High-Availability
+ cluster management in GNU/Linux. Effortlessly configure, manage and 
+ troubleshoot your clusters from the command line, with full tab completion
+ and extensive help. crmsh also provides advanced features like low-level 
+ cluster configuration, cluster scripting and package management, and 
+ history exploration tools giving you an instant view of what your cluster 
+ is doing.
+
+Package: crmsh-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Description: crmsh HTML Documentation
+ The crm shell is an advanced command-line interface for High-Availability
+ cluster management in GNU/Linux. Effortlessly configure, manage and 
+ troubleshoot your clusters from the command line, with full tab completion
+ and extensive help. crmsh also provides advanced features like low-level 
+ cluster configuration, cluster scripting and package management, and 
+ history exploration tools giving you an instant view of what your cluster 
+ is doing.
+ .
+ This package contains the html Pacemaker API documentation.

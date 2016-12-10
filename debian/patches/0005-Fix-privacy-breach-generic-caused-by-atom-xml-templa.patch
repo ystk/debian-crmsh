@@ -1,0 +1,28 @@
+From: Richard B Winters <rik@mmogp.com>
+Date: Fri, 29 Jan 2016 10:43:46 -0500
+Subject: Fix privacy-breach-generic caused by atom xml template
+
+ - Modifies the atom xml template so as not to breach 
+   privacy by using remote resources.
+
+Change-Id: I0043f9815620a3b88546c481f416b6ebebe66472
+Signed-off-by: Richard B Winters <rik@mmogp.com>
+---
+ doc/website-v1/make-news.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/doc/website-v1/make-news.py b/doc/website-v1/make-news.py
+index f3c9073..89271d2 100644
+--- a/doc/website-v1/make-news.py
++++ b/doc/website-v1/make-news.py
+@@ -21,8 +21,8 @@ ATOM_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
+ <feed xmlns="http://www.w3.org/2005/Atom">
+ <title>crmsh</title>
+ <subtitle>Cluster manager shell news</subtitle>
+-<link href="http://crmsh.github.io/atom.xml" rel="self" />
+-<link href="http://crmsh.github.io/" />
++<link href="/atom.xml" rel="self" />
++<link href="/" />
+ <id>%(id)s</id>
+ <updated>%(updated)s</updated>
+ %(entries)s

@@ -1,0 +1,46 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#DH_VERBOSE = 1
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# Ensure that we link against all needed libraries (cf. Policy 10.2)
+export DEB_LDFLAGS_MAINT_APPEND=-Wl,-z,defs
+
+# Properly support multi-arch triplet paths
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH) 
+
+# If your package provides eggs, install egg-info directories instead of real eggs
+DEB_PYTHON_INSTALL_ARGS_ALL += --single-version-externally-managed
+
+# main packaging script based on dh7 syntax
+%:
+	dh $@ --with autoreconf,python2 --fail-missing
+
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/usr --sysconfdir=/etc \
+	    --libdir=/usr/lib/$(DEB_HOST_MULTIARCH) --includedir=/usr/include/$(DEB_HOST_MULTIARCH) \
+	    --datadir=/usr/share --docdir=/usr/share/doc/crmsh --htmldir=/usr/share/doc/crmsh/html
+
+override_dh_auto_build:
+	dh_auto_build
+# Manually invoke building of the asciidoc html documentation
+	cd $(CURDIR)/doc/website-v1 && $(MAKE)
+	cd $(CURDIR)/../
+
+DOC = debian/tmp/usr/share/doc/crmsh
+
+override_dh_auto_install:
+	dh_auto_install
+# remove redundant COPYING files
+	rm -v $(DOC)/COPYING $(DOC)/ChangeLog
+
+override_dh_compress:
+	find $(CURDIR)/debian/crmsh/ -name '*.pyo' | xargs rm -rf
+	find $(CURDIR)/debian/crmsh/ -name '*.pyc' | xargs rm -rf
+	dh_compress
+
+override_dh_clean:
+	dh_clean build/ doc/*.8 doc/*.html doc/website-v1/gen/

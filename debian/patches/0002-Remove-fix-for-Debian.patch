@@ -1,0 +1,31 @@
+From: Richard B Winters <rik@mmogp.com>
+Date: Fri, 29 Jan 2016 10:38:47 -0500
+Subject: Remove fix for Debian
+
+ - The fix for Debian is not necessary, and so the 
+   respective logic can be safely removed
+ - This patch was forwarded and merged upstream
+
+Change-Id: Ic8ea96abcf36b81d8104380bc596f593dae248d5
+Signed-off-by: Richard B Winters <rik@mmogp.com>
+---
+ Makefile.am | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index d89affb..1195376 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -68,12 +68,7 @@ all-local:
+ 		--build-base $(shell readlink -f $(builddir))/build \
+ 		--verbose)
+ 
+-# Fix for GNU/Linux
+-if UNAME_IS_DEBIAN
+-python_prefix = 
+-else
+ python_prefix = --prefix=$(DESTDIR)$(prefix)
+-endif
+ 
+ install-exec-local:
+ 	-mkdir -p $(DESTDIR)$(pkgpythondir)

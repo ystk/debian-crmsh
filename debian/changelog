@@ -1,0 +1,176 @@
+crmsh (2.2.0-1~bpo8+1) jessie-backports; urgency=medium
+
+  * Rebuild for jessie-backports.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Mon, 14 Mar 2016 15:44:12 +0100
+
+crmsh (2.2.0-1) unstable; urgency=high
+
+  [ Richard B Winters ]
+  * New upstream release 
+  * debian/clean: Added 
+    - In order to incorporate the recommended strategy for
+      handling Python eggs
+  * debian/rules: Multiple changes;
+    - Updated hardening implementation
+    - Added an export for ensuring a link against all needed 
+      libraries (cf. Policy 10.2)
+    - Override configure to properly set paths for build
+    - Override dh_auto_build to add instruction for building 
+      html documentation
+    - Override dh_auto_install to remove duplicate files
+    - Override dh_compress to strip compiled bytecode from the
+      package
+    - Added --single-version-externally-managed as recommended
+      for handling Python eggs
+  * debian/control: Multiple changes;
+    - Updated uploaders list and formatted for folding
+    - Added Vcs-Git and Vcs-Browser entries
+    - Updated Build-Depends to reflect current dependencies;
+    - Python updated to Python2.7 as > Python27 not supported
+    - Dropped hardening-wrapper; not necessary any longer
+    - Formatted Build-Depends and Depends entries for folding
+    - Updated Build-Depends to not use transitional packages
+    - Updated description
+    - Bumped standards version to 3.9.6; No changes required
+    - Added crmsh-doc to package offering
+  * debian/copyright: Multiple edits
+    - Updated source field to current upstream source location
+    - Consolidated copyright notices for authors added to upstreams
+      author list found in AUTHORS
+    - Updated copyright for debian/* to include myself and Debian-HA
+      team
+    - Added License paragraph to remove need for including a paragraph
+      for each copyright/license entry present
+  * debian/crmsh.install: Added since multiple package build requires
+    it
+  * debian/crmsh.doc-base: Added for crmsh html documents
+  * debian/crmsh-doc.install: Add to support crmsh-doc package
+  * debian/crmsh-doc.doc-base: Added for crmsh-doc html documents
+  * debian/patches/*: Added for resolving privacy-breach-generic
+    lintian informational warnings;
+    - Includes binary png file in source to remove need for remote
+      resource
+    - Patches crm.conf file for asciidoc, to fix remove remote
+      resource in .html files
+    - Patch python file to fix resource links in atom.xml template
+    - Series file added
+  * debian/postinst: Added to compile bytecode for *.py files
+  * debian/prerm: Added to removed compiled bytecode
+  * debian/pycompat: Added as recommended by packaging tools
+  * debian/source/include-binaries: Added to allow patch which adds
+    a binary png file to the upstream source
+  * debian/source/options: Added
+    - Added to incorporate the recommended strategy for handling
+      Python eggs
+  * debian/watch: Added for monitoring upstream releases
+
+  [ Adrian Vondendriesch ]
+  * debian/control: Add python-dateutil to Build-Depends
+
+ -- Richard B Winters <rik@mmogp.com>  Thu, 28 Jan 2016 21:22:05 +0100
+
+crmsh (1.2.6+git+e77add-2) unstable; urgency=medium
+
+  * Update control for new pacemaker dev packages.
+
+ -- Christoph Berg <myon@debian.org>  Sat, 16 Jan 2016 16:26:36 +0100
+
+crmsh (1.2.6+git+e77add-1.4) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Port from python-support to dh_python2 (Closes: #785973)
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 20 Aug 2015 15:31:26 +0200
+
+crmsh (1.2.6+git+e77add-1.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Build-Depend on docbook-xsl to fix FTBFS
+    Closes: 770132
+
+ -- Johann Felix Soden <johfel@debian.org>  Sat, 22 Nov 2014 13:09:35 +0100
+
+crmsh (1.2.6+git+e77add-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Depend on python-yaml to fix grave bug (Closes: #745219)
+
+ -- Stefan Bauer (Cubewerk GmbH) <stefan.bauer@cubewerk.de>  Fri, 25 Apr 2014 17:46:39 +0200
+
+crmsh (1.2.6+git+e77add-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Add pkg-config to Build-Depends. Closes: 741772
+
+ -- Chris Boot <debian@bootc.net>  Sat, 22 Mar 2014 15:50:25 +0000
+
+crmsh (1.2.6+git+e77add-1) unstable; urgency=medium
+
+  * New upstream checkout
+  * debian/control: Bump Standards-Version
+  * debian/control: Add Breaks & Replaces for Pacemaker << 1.1.8 
+    Closes: 717986
+  * debian/control: Depend on python-lxml
+    Closes: 738651
+
+ -- Martin Loschwitz <madkiss@debian.org>  Fri, 21 Feb 2014 15:51:13 +0000
+
+crmsh (1.2.5+hg1034-1) unstable; urgency=low
+
+  * New upstream checkout
+
+ -- Martin Loschwitz <madkiss@debian.org>  Mon, 05 Aug 2013 05:21:29 +0000
+
+crmsh (1.2.5+hg1006-1) unstable; urgency=low
+
+  * New upstream checkout for Pacemaker 1.1.10
+
+ -- Martin Loschwitz <madkiss@debian.org>  Fri, 02 Aug 2013 07:37:50 +0000
+
+crmsh (1.2.5+hg953-3) unstable; urgency=low
+
+  * Upload to unstable instead of experimental
+
+ -- Martin Loschwitz <madkiss@debian.org>  Fri, 02 Aug 2013 06:52:11 +0000
+
+crmsh (1.2.5+hg953-2) experimental; urgency=low
+
+  * Build-Depend on libcib3-dev instead of libcib2-dev
+
+ -- Martin Loschwitz <madkiss@debian.org>  Fri, 19 Apr 2013 07:08:47 +0000
+
+crmsh (1.2.5+hg953-1) experimental; urgency=low
+
+  * New upstream release 
+
+ -- Martin Loschwitz <madkiss@debian.org>  Wed, 20 Mar 2013 23:11:44 +0000
+
+crmsh (1.2.0+hg20121010-1) unstable; urgency=low
+
+  * New upstream checkout to catch some additional bugfixes
+  * debian/control: Depend on version 1.1.8+git20121010 of libcib as well
+    as libcrmcommon and libpengine to make sure we get the versions with
+    proper .pc files (Closes: #690055)
+
+ -- Martin Loschwitz <madkiss@debian.org>  Wed, 10 Oct 2012 11:39:06 +0000
+
+crmsh (1.2.0+hg20121009-3) unstable; urgency=low
+
+  * debian/control: Fix possible circular build dependency by using the
+    real library package names instead of pacemaker-dev (Closes: #690055)
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 09 Oct 2012 17:29:01 +0000
+
+crmsh (1.2.0+hg20121009-2) unstable; urgency=low
+
+  * debian/control: Set the maintainer field to the HA group instead of me
+    personally. (Closes: #690055)
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 09 Oct 2012 16:20:15 +0000
+
+crmsh (1.2.0+hg20121009-1) unstable; urgency=low
+
+  * Initial release (Closes: #690055)  <nnnn is the bug number of your ITP>
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 09 Oct 2012 14:36:09 +0000

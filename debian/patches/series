@@ -1,0 +1,6 @@
+0001-Remove-AM_CONDITIONAL-for-UNAME_IS_DEBIAN.patch
+0002-Remove-fix-for-Debian.patch
+0003-Add-remote-resource-to-local-cache.patch
+0004-Fix-privacy-breach-generic-caused-by-footer-template.patch
+0005-Fix-privacy-breach-generic-caused-by-atom-xml-templa.patch
+0006-Fix-privacy-breach-generic-caused-by-youtube-iframe.patch
