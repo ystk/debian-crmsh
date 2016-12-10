@@ -1,0 +1,85 @@
+# Copyright (C) 2008-2011 Dejan Muhamedagic <dmuhamedagic@suse.de>
+# See COPYING for license information.
+
+CIB=__crmsh_regtest
+
+filter_epoch() {
+	sed '/^<cib /s/ epoch="[0-9]*"/ epoch="1"/'
+}
+filter_date() {
+	sed '/^<cib /s/cib-last-written=".*"/cib-last-written="Sun Apr 12 21:37:48 2009"/'
+}
+filter_cib() {
+	sed -n '/^<?xml/,/^<\/cib>/p' | filter_date | filter_epoch
+}
+
+crm_setup() {
+	$CRM_NO_REG options reset
+	$CRM_NO_REG options check-frequency on-verify
+	$CRM_NO_REG options check-mode relaxed
+	$CRM_NO_REG cib delete $CIB 2>/dev/null
+}
+
+crm_mksample() {
+	$CRM_NO_REG cib new $CIB empty 2>/dev/null
+	$CRM_NO_REG -c $CIB<<EOF
+configure
+node node1
+primitive p0 ocf:pacemaker:Dummy
+primitive p1 ocf:pacemaker:Dummy
+primitive p2 ocf:heartbeat:Delay \
+	params startdelay=2 mondelay=2 stopdelay=2
+primitive p3 ocf:pacemaker:Dummy
+primitive st stonith:null params hostlist=node1
+clone c1 p1
+ms m1 p2
+property default-action-timeout=60s
+commit
+end
+EOF
+}
+crm_show() {
+	$CRM -c $CIB<<EOF
+configure
+_regtest on
+erase
+erase nodes
+`cat`
+show
+commit
+EOF
+}
+crm_showxml() {
+	$CRM -c $CIB<<EOF | filter_cib
+configure
+_regtest on
+erase
+erase nodes
+`cat`
+show xml
+commit
+EOF
+}
+crm_session() {
+	$CRM -c $CIB <<EOF
+`cat`
+EOF
+}
+crm_filesession() {
+	local _file=`mktemp`
+	$CRM -c $CIB configure save xml $_file
+	CIB_file=$_file $CRM <<EOF
+`cat`
+EOF
+	rm -f $_file
+}
+crm_single() {
+	$CRM -c $CIB $*
+}
+crm_showobj() {
+	$CRM -c $CIB<<EOF | filter_date | filter_epoch
+configure
+_regtest on
+show xml $1
+EOF
+}

@@ -1,0 +1,69 @@
+Announcing crmsh release 2.1.2
+==============================
+:Author: Kristoffer Gronlund
+:Email: kgronlund@suse.com
+:Date: 2015-01-26 11:05
+
+Today we are proud to announce the release of `crmsh` version 2.1.2!
+This version primarily fixes all known issues found since the release
+of `crmsh` 2.1.1 in October. We recommend that all users of crmsh upgrade
+to this version, especially if using Pacemaker 1.1.12 or newer.
+
+A massive thank you to everyone who has helped out with bug fixes,
+comments and contributions for this release!
+
+For a complete list of changes since the previous version, please
+refer to the changelog:
+
+* https://github.com/crmsh/crmsh/blob/2.1.2/ChangeLog
+
+Packages for several popular Linux distributions can be downloaded
+from the Stable repository at the OBS:
+
+* http://download.opensuse.org/repositories/network:/ha-clustering:/Stable/
+
+Archives of the tagged release:
+
+* https://github.com/crmsh/crmsh/archive/2.1.2.tar.gz
+* https://github.com/crmsh/crmsh/archive/2.1.2.zip
+
+Changes since the previous release:
+
+ - medium: ui_resource: Set probe interval 0 if not set (bnc#905050)
+ - doc: Document probe op in resource trace (bnc#905050)
+ - high: config: Fix path to system-wide crm.conf (#67)
+ - medium: config: Fall back to /etc/crm/crmsh.conf (#67)
+ - low: cliformat: Colorize id: as identifier (boo#905338)
+ - medium: cibconfig: Don't bump epoch if stripping version
+ - medium: ui_context: Lazily import readline
+ - medium: config: Add core.ignore_missing_metadata (#68) (boo#905910)
+ - medium: cibconfig: Strip digest from v1 diffs (bnc#914098)
+ - medium: cibconfig: Detect v1 format and don't patch container changes (bnc#914098)
+ - high: xmlutil: Treat node type=member as normal (boo#904698)
+ - medium: xmlutil: Use idmgmt when creating new elements (bnc#901543)
+ - low: ui_resource: --reprobe and --refresh are deprecated (bnc#905092)
+ - doc: Document deprecation of refresh and reprobe (bnc#905092)
+ - medium: parse: Support resource-discovery in location constraints
+ - medium: Allow removing groups even if is_running (boo#905271)
+ - medium: cibconfig: Delete containers first in edits (boo#905268)
+ - medium: ui_history: Fix crash using empty object set
+ - Low: term: get rid of annying ^O in piped-to-less-R output
+ - medium: parse: Allow nvpair with no value using name= syntax (#71)
+ - medium: parse: Enable name[=value] for nvpair (#71)
+ - medium: utils: Check if path basename is less (#74)
+ - medium: utils: crm_daemon_dir is added to PATH in envsetup (#67)
+ - medium: cmd_status: Show pending if available, enable extra options
+ - high: utils: Locate binaries across sudo boundary (bnc#912483)
+ - Medium: history: match error/crit messages of pcmk 1.1.12
+ - low: ui_options: Add underscore aliases for legacy options
+ - medium: constants: Fix transition start detection
+ - medium: constants: Update transition regex (#77)
+ - medium: orderedset: Add OrderedSet type
+ - medium: cibconfig: Use orderedset to avoid reordering bugs (#79)
+ - low: xmlutil: logic bug in sanity_check_nvpairs
+ - medium: util: Don't fall back to current time
+ - medium: report: Fall back to end_ts = start_ts
+
+Thank you,
+
+Kristoffer and Dejan

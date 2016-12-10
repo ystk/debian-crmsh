@@ -1,0 +1,11 @@
+configure
+property stonith-enabled=false
+primitive testfs ocf:heartbeat:Dummy \
+	params fake=2
+clone testfs-clone testfs \
+	meta ordered="true" interleave="true"
+commit
+up
+resource stop testfs-clone
+quit
+

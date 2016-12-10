@@ -1,0 +1,10 @@
+<cib crm_feature_set="3.0.9" validate-with="pacemaker-2.0" epoch="59" num_updates="0" admin_epoch="0" cib-last-written="Tue Sep  2 12:08:39 2014">
+  <configuration>
+    <crm_config/>
+    <nodes/>
+    <resources/>
+    <constraints/>
+    <acls/>
+  </configuration>
+  <status/>
+</cib>

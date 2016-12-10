@@ -1,0 +1,98 @@
+.TRY Configuration bugs
+.INP: options
+.INP: sort_elements false
+.INP: up
+.INP: configure
+.INP: erase
+.INP: primitive st stonith:null 	params hostlist='node1' 	meta description="some description here" 	op start requires=nothing 	op monitor interval=60m
+.INP: primitive p4 Dummy
+.INP: primitive p3 Dummy
+.INP: primitive p2 Dummy
+.INP: primitive p1 Dummy
+.INP: colocation c1 inf: p1 p2
+.INP: filter "sed 's/p1 p2/& p3/'" c1
+.INP: show c1
+colocation c1 inf: p1 p2 p3
+.INP: delete c1
+.INP: colocation c2 inf: [ p1 p2 ] p3 p4
+.INP: filter "sed 's/\[/\(/;s/\]/\)/'" c2
+.INP: show c2
+colocation c2 inf: ( p1 p2 ) p3 p4
+.INP: primitive p5 Dummy
+.INP: primitive p6 Dummy
+.INP: clone cl-p5 p5
+.INP: show
+node node1
+primitive st stonith:null \
+	params hostlist=node1 \
+	meta description="some description here" \
+	op start requires=nothing interval=0 \
+	op monitor interval=60m
+primitive p4 Dummy
+primitive p3 Dummy
+primitive p2 Dummy
+primitive p1 Dummy
+primitive p5 Dummy
+primitive p6 Dummy
+clone cl-p5 p5
+colocation c2 inf: ( p1 p2 ) p3 p4
+.INP: commit
+.EXT crm_resource --show-metadata stonith:null
+.EXT stonithd metadata
+.EXT crm_resource --show-metadata ocf:heartbeat:Dummy
+.EXT pengine metadata
+.INP: _test
+.INP: verify
+.INP: show
+node node1
+primitive st stonith:null \
+	params hostlist=node1 \
+	meta description="some description here" \
+	op start requires=nothing interval=0 \
+	op monitor interval=60m
+primitive p4 Dummy
+primitive p3 Dummy
+primitive p2 Dummy
+primitive p1 Dummy
+primitive p6 Dummy
+primitive p5 Dummy
+clone cl-p5 p5
+colocation c2 inf: ( p1 p2 ) p3 p4
+.TRY Unordered load file
+.INP: options
+.INP: sort_elements false
+.INP: up
+.INP: configure
+.INP: load update bugs-test.txt
+.INP: show
+node node1
+primitive st stonith:null \
+	params hostlist=node1
+primitive p4 Dummy
+primitive p3 Dummy
+primitive p2 Dummy
+primitive p1 Dummy
+primitive p6 Dummy
+primitive p5 Dummy
+primitive gr1 Dummy
+primitive gr2 Dummy
+primitive gr3 Dummy
+primitive gr4 Dummy
+group g1 gr1 gr2
+group g2 gr3
+group g3 gr4
+clone cl-p5 p5
+colocation c2 inf: ( p1 p2 ) p3 p4
+location loc1 g1 \
+	rule 200: #uname eq node1
+property cib-bootstrap-options: \
+	default-action-timeout=60s
+.INP: commit
+.EXT crm_resource --show-metadata stonith:null
+.EXT stonithd metadata
+.EXT crm_resource --show-metadata ocf:heartbeat:Dummy
+.EXT crmd metadata
+.EXT pengine metadata
+.EXT cib metadata
+.INP: _test
+.INP: verify

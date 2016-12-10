@@ -1,0 +1,27 @@
+<cib>
+  <configuration>
+    <crm_config>
+      <cluster_property_set id="cib-bootstrap-options">
+        <nvpair name="stonith-enabled" value="false" id="cib-bootstrap-options-stonith-enabled"/>
+      </cluster_property_set>
+    </crm_config>
+    <nodes/>
+    <resources>
+      <clone id="testfs-clone">
+        <meta_attributes id="testfs-clone-meta_attributes">
+          <nvpair name="ordered" value="true" id="testfs-clone-meta_attributes-ordered"/>
+          <nvpair name="interleave" value="true" id="testfs-clone-meta_attributes-interleave"/>
+          <nvpair id="testfs-clone-meta_attributes-target-role" name="target-role" value="Started"/>
+        </meta_attributes>
+        <primitive id="testfs" class="ocf" provider="heartbeat" type="Dummy">
+          <instance_attributes id="testfs-instance_attributes">
+            <nvpair name="fake" value="hello" id="testfs-instance_attributes-fake"/>
+          </instance_attributes>
+        </primitive>
+      </clone>
+    </resources>
+    <constraints/>
+    <acls/>
+  </configuration>
+  <status/>
+</cib>

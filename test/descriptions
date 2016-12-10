@@ -1,0 +1,19 @@
+# Copyright (C) 2008-2011 Dejan Muhamedagic <dmuhamedagic@suse.de>
+# See COPYING for license information.
+
+lead=".TRY"
+describe_show() {
+	echo $lead $*
+}
+describe_showxml() {
+	: echo $lead $*
+}
+describe_session() {
+	echo $lead $*
+}
+describe_filesession() {
+	echo $lead $*
+}
+describe_single() {
+	echo $lead $*
+}

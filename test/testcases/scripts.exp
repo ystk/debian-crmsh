@@ -1,0 +1,273 @@
+.TRY Cluster scripts
+.INP: script
+.INP: list
+.EXT crm_resource --show-metadata ocf:heartbeat:apache
+.EXT crm_resource --show-metadata ocf:heartbeat:IPaddr2
+.EXT crm_resource --show-metadata ocf:heartbeat:Filesystem
+.EXT crm_resource --show-metadata ocf:heartbeat:mysql
+.EXT crm_resource --show-metadata ocf:heartbeat:db2
+.EXT crm_resource --show-metadata ocf:heartbeat:exportfs
+.EXT crm_resource --show-metadata systemd:haproxy
+ERROR: 2: Error when loading script haproxy: No meta-data for agent: systemd:haproxy
+.EXT crm_resource --show-metadata ocf:heartbeat:LVM
+.EXT crm_resource --show-metadata ocf:heartbeat:MailTo
+.EXT crm_resource --show-metadata ocf:heartbeat:Raid1
+Basic:
+
+mailto           MailTo
+virtual-ip       Virtual IP
+
+Database:
+
+database         MySQL/MariaDB Database
+db2              IBM DB2 Database
+db2-hadr         IBM DB2 Database with HADR
+oracle           Oracle Database
+
+Filesystem:
+
+clvm             Cluster-aware LVM
+clvm-vg          Cluster-aware LVM (Volume Group)
+drbd             DRBD Block Device
+filesystem       Filesystem (mount point)
+gfs2             gfs2 filesystem (cloned)
+gfs2-base        gfs2 filesystem base (cloned)
+ocfs2            OCFS2 filesystem (cloned)
+raid-lvm         RAID hosting LVM
+
+SAP:
+
+sap-as           SAP ASCS Instance
+sap-ci           SAP Central Instance
+sap-db           SAP Database Instance
+sap-simple-stack SAP Simple Stack Instance
+sap-simple-stack-plus SAP SimpleStack+ Instance
+
+Server:
+
+apache           Apache Webserver
+exportfs         NFS Exported File System
+nfsserver        NFS Server
+
+Stonith:
+
+libvirt          STONITH for libvirt (kvm / Xen)
+sbd              SBD, Shared storage based fencing
+
+.INP: list all
+.EXT crm_resource --show-metadata systemd:haproxy
+ERROR: 3: Error when loading script haproxy: No meta-data for agent: systemd:haproxy
+Basic:
+
+mailto           MailTo
+virtual-ip       Virtual IP
+
+Database:
+
+database         MySQL/MariaDB Database
+db2              IBM DB2 Database
+db2-hadr         IBM DB2 Database with HADR
+oracle           Oracle Database
+
+Filesystem:
+
+clvm             Cluster-aware LVM
+clvm-vg          Cluster-aware LVM (Volume Group)
+drbd             DRBD Block Device
+filesystem       Filesystem (mount point)
+gfs2             gfs2 filesystem (cloned)
+gfs2-base        gfs2 filesystem base (cloned)
+ocfs2            OCFS2 filesystem (cloned)
+raid-lvm         RAID hosting LVM
+
+SAP:
+
+sap-as           SAP ASCS Instance
+sap-ci           SAP Central Instance
+sap-db           SAP Database Instance
+sap-simple-stack SAP Simple Stack Instance
+sap-simple-stack-plus SAP SimpleStack+ Instance
+
+Script:
+
+add              Add a new node to an already existing cluster
+check-uptime     Check uptime of nodes
+health           Check the health of the cluster
+init             Initialize a new cluster
+lvm              Controls the availability of an LVM Volume Group
+raid1            Manages Linux software RAID (MD) devices on shared storage
+remove           Remove node from cluster
+sapdb            SAP Database Instance
+sapinstance      SAP Instance
+
+Server:
+
+apache           Apache Webserver
+exportfs         NFS Exported File System
+nfsserver        NFS Server
+
+Stonith:
+
+libvirt          STONITH for libvirt (kvm / Xen)
+sbd              SBD, Shared storage based fencing
+
+.INP: list names
+add
+apache
+check-uptime
+clvm
+clvm-vg
+database
+db2
+db2-hadr
+drbd
+exportfs
+filesystem
+gfs2
+gfs2-base
+.EXT crm_resource --show-metadata systemd:haproxy
+ERROR: 4: Error when loading script haproxy: No meta-data for agent: systemd:haproxy
+health
+init
+libvirt
+lvm
+mailto
+nfsserver
+ocfs2
+oracle
+raid-lvm
+raid1
+remove
+sap-as
+sap-ci
+sap-db
+sap-simple-stack
+sap-simple-stack-plus
+sapdb
+sapinstance
+sbd
+virtual-ip
+.INP: list names all
+add
+apache
+check-uptime
+clvm
+clvm-vg
+database
+db2
+db2-hadr
+drbd
+exportfs
+filesystem
+gfs2
+gfs2-base
+haproxy
+health
+init
+libvirt
+lvm
+mailto
+nfsserver
+ocfs2
+oracle
+raid-lvm
+raid1
+remove
+sap-as
+sap-ci
+sap-db
+sap-simple-stack
+sap-simple-stack-plus
+sapdb
+sapinstance
+sbd
+virtual-ip
+.INP: list all names
+add
+apache
+check-uptime
+clvm
+clvm-vg
+database
+db2
+db2-hadr
+drbd
+exportfs
+filesystem
+gfs2
+gfs2-base
+haproxy
+health
+init
+libvirt
+lvm
+mailto
+nfsserver
+ocfs2
+oracle
+raid-lvm
+raid1
+remove
+sap-as
+sap-ci
+sap-db
+sap-simple-stack
+sap-simple-stack-plus
+sapdb
+sapinstance
+sbd
+virtual-ip
+.INP: list bogus
+ERROR: 7: script.list: Unexpected argument 'bogus': expected  [all|names]
+.INP: show mailto
+mailto (Basic)
+MailTo
+
+ This is a resource agent for MailTo. It sends email to a sysadmin
+whenever  a takeover occurs.
+
+1. Notifies recipients by email in the event of resource takeover
+
+  id (required)  (unique) 
+      Identifier for the cluster resource
+  email (required) 
+      Email address
+  subject
+      Subject
+
+
+.INP: verify mailto id=foo email=test@example.com subject=hello
+1. Ensure mail package is installed
+
+	mailx
+
+2. Configure cluster resources
+
+	primitive foo ocf:heartbeat:MailTo
+		email="test@example.com"
+		subject="hello"
+		op start timeout="10"
+		op stop timeout="10"
+		op monitor interval="10" timeout="10"
+
+	clone c-foo foo
+
+.INP: run mailto id=foo email=test@example.com subject=hello nodes=node1 dry_run=true
+INFO: 10: MailTo
+INFO: 10: Nodes: node1
+** all - #!/usr/bin/env python
+import crm_script
+import crm_init
+
+crm_init.install_packages(['mailx'])
+crm_script.exit_ok(True)
+        
+OK: 10: Ensure mail package is installed
+** localhost - temporary file <<END
+primitive foo ocf:heartbeat:MailTo	email="test@example.com"	subject="hello"	op start timeout="10"	op stop timeout="10"	op monitor interval="10" timeout="10"
+clone c-foo foo
+
+END
+
+** localhost - crm --wait --no configure load update <<temporary file>>
+OK: 10: Configure cluster resources

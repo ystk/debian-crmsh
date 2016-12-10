@@ -1,0 +1,4 @@
+lxml
+PyYAML
+nosexcover
+python-dateutil

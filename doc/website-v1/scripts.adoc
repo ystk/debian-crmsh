@@ -1,0 +1,643 @@
+= Cluster Scripts =
+:source-highlighter: pygments
+
+.Version information
+NOTE: This section applies to `crmsh 2.2+` only.
+
+== Introduction ==
+
+A big part of the configuration and management of a cluster is
+collecting information about all cluster nodes and deploying changes
+to those nodes. Often, just performing the same procedure on all nodes
+will encounter problems, due to subtle differences in the
+configuration.
+
+For example, when configuring a cluster for the first time, the
+software needs to be installed and configured on all nodes before the
+cluster software can be launched and configured using `crmsh`. This
+process is cumbersome and error-prone, and the goal is for scripts to
+make this process easier.
+
+Another important function of scripts is collecting information and
+reporting potential issues with the cluster. For example, software
+versions may differ between nodes, causing byzantine errors or random
+failure. `crmsh` comes packaged with a `health` script which will
+detect and warn about many of these types of problems.
+
+There are many tools for managing a collection of nodes, and scripts
+are not intended to replace these tools. Rather, they provide an
+integrated way to perform tasks across the cluster that would
+otherwise be tedious, repetitive and error-prone. The scripts
+functionality in the crm shell is mainly inspired by Ansible, a
+light-weight and efficient configuration management tool.
+
+Scripts are implemented using the python `parallax` package which
+provides a thin wrapper on top of SSH. This allows the scripts to
+function through the usual SSH channels used for system maintenance,
+requiring no additional software to be installed or maintained.
+
+For many scripts that only configure cluster resources or only perform
+changes on the local machine, the use of SSH is not necessary. These
+scripts can be used even if there is no way for `crmsh` to reach the
+other nodes other than through the cluster configuration.
+
+NOTE: The scripts functionality in `crmsh` has been greatly expanded
+and improved in `crmsh` 2.2. Many new scripts have been added, and in
+addition the scripts are now used as the backend for the wizards
+functionality in HAWK, the HA web interface. For more information, see
+https://github.com/ClusterLabs/hawk.
+
+== Usage ==
+
+Scripts are available through the `cluster` sub-level in the crm
+shell. Some scripts have custom commands linked to them for
+convenience, such as the `init`, `add` and `remove` commands available
+in the `cluster` sublevel, for creating new clusters, introducing new
+nodes into the cluster and for removing nodes from a running cluster.
+
+Other scripts can be accessed through the `script` sub-level.
+
+=== Common Parameters ===
+
+Which parameters a script accepts varies from script to
+script. However, there is a set of parameters that are common to all
+scripts. These parameters can be passed to any script.
+
+`nodes`::
+    List of nodes to execute the script for
+`dry_run`::
+    If set, simulate execution only
+    (default: no)
+`action`::
+    If set, only execute a single action (index, as returned by verify)
+`statefile`::
+    When single-stepping, the state is saved in the given file
+`user`::
+    Run script as the given user
+`sudo`::
+    If set, crm will prompt for a sudo password and use sudo when appropriate
+    (default: no)
+`port`::
+    Port to connect on
+`timeout`::
+    Execution timeout in seconds
+    (default: 600)
+
+=== List available scripts ===
+
+To list the available scripts, use the following command:
+
+.........
+# crm script
+list
+.........
+
+The available scripts are listed along with a short
+description. Optionally, the arguments +all+ or +names+ can be
+used. Without the +all+ flag, some scripts that are used by `crmsh` to
+implement certain commands are hidden from view. With the +names+
+flag, only a plain list of script names is printed.
+
+=== Script description ===
+
+To get more details about a script, run the `show` command. For
+example, to get more information about what the `virtual-ip` script does
+and what parameters it accepts, use the following command:
+
+.........
+# crm script
+show virtual-ip
+.........
+
+`show` will print a longer description of the script, along with a
+list of parameters divided into _steps_. Each script is divided into a
+series of steps which are performed in order. Some steps may not
+accept any parameters, but for those that do, the available parameters
+are listed here.
+
+By default, only a basic subset of the available parameters is printed
+in order to make the scripts easier to use. By passing `all` to the
+`show` command, the advanced parameters are also shown. In addition,
+there is a list of common parameters
+
+`show` will print a longer explanation for the script, along with
+a list of parameters, each parameter having a description, a note
+saying if it is an optional or required parameter, and if optional,
+what the default value is.
+
+=== Verifying parameters ===
+
+Since a script potentially performs a series of actions and may fail
+for various reasons at any point, it is advisable to review the
+actions that a script will perform before actually running it. To do
+this, the `verify` command can be used.
+
+Pass the parameters that you would pass to `run`, and `verify` will
+check that the parameter values are OK, as well as print the sequence
+of steps that will be performed given the particular parameter values
+given.
+
+The following is an example showing how to verify the creation of a
+Virtual IP resource, using the `virtual-ip` script:
+
+..........
+# crm script
+verify virtual-ip id=my-virtual-ip ip=192.168.0.10
+..........
+
+`crmsh` will print something similar to the following output:
+
+...........
+1. Configure cluster resources
+
+	primitive my-virtual-ip ocf:heartbeat:IPaddr2
+		ip="192.168.0.10"
+		op start timeout="20" op stop timeout="20"
+		op monitor interval="10" timeout="20"
+...........
+
+In this particular case, there is only a single step, and that step
+configures a primitive resource. Other scripts may configure multiple
+resources and constraints, or may perform multiple steps in sequence.
+
+=== Running a script ===
+
+To run a script, all required parameters and any optional parameters
+that should have values other than the default should be provided as
+`key=value` pairs on the command line.
+
+The following example shows how to create a Virtual IP resource using
+the `virtual-ip` script:
+
+........
+# crm script
+run virtual-ip id=my-virtual-ip ip=192.168.0.10
+........
+
+==== Single-stepping a script ====
+
+It is possible to run a script action-by-action, with manual intervention
+between actions. First of all, list the actions to perform given a
+certain set of parameter values:
+
+........
+crm script verify health
+........
+
+To execute a single action, two things need to be provided:
+
+1. The index of the action to execute (printed by `verify`)
+2. a file in which `crmsh` stores the state of execution.
+
+Note that it is entirely possible to run actions out-of-order, however
+this is unlikely to work in practice since actions often rely on the
+outcome of previous actions.
+
+The following command will execute the first action of the `health`
+script and store the output in a temporary file named `health.json`:
+
+........
+crm script run health action=1 statefile='health.json'
+........
+
+The statefile contains the script parameters and the output of
+previous steps, encoded as `json` data.
+
+To continue executing the next action in sequence, enter the next
+action index:
+
+........
+crm script run health action=2 statefile='health.json'
+........
+
+Note that the `dry_run` flag that can be used to do partial execution
+of scripts is not taken into consideration when single-stepping
+through a script.
+
+== Creating a script ==
+
+This section will describe how to create a new script, where to put
+the script to allow `crmsh` to find it, and how to test that the
+script works as intended.
+
+=== How scripts work, in detail ===
+
+NOTE: The implementation of cluster scripts was revised between
+`crmsh` 2.0 and `crmsh` 2.2. This section describes the revised
+cluster script format. The old format is still accepted by `crmsh`.
+
+A cluster script consists of four main sections:
+
+. The name and description of the script.
+. Any other scripts or agents included by this script, and any parameter value overrides to those provided by the included script.
+. A set of parameters accepted by the script itself, in addition to those accepted by any scripts or agents included in the script.
+. A sequence of actions which the script will perform.
+
+When the script runs, the actions defined in `main.yml` as described
+below are executed one at a time. Each action prescribes a
+modification that is applied to the cluster. Some actions work by
+calling out to scripts on each of the cluster nodes, and others apply
+only on the local node from which the script was executed.
+
+=== Actions ===
+
+Scripts perform actions that are classified into a few basic
+types. Each action is performed by calling out to a shell script,
+but the arguments and location of that script varies depending on the
+type.
+
+Here are the types of script actions that can be performed:
+
+cib::
+  * Applies a new CIB configuration to the cluster
+
+install::
+  * Ensures that the given list of packages is installed on all
+    cluster nodes using the system package manager.
+
+service::
+  * Manages system services using the system init tools. The argument
+    should be a space-separated list of <service>:<state> pairs.
+
+call::
+  * Run a shell command as specified in the action, either on the
+    local node on or all nodes.
+
+copy::
+  * Installs a file on the cluster nodes.
+  * Using a configuration template, install a file on the cluster
+    nodes.
+
+crm::
+  * Runs the given command using the `crm` shell. This can be used to
+    start and stop resources, for example.
+
+collect::
+  * Runs on all cluster nodes
+  * Gathers information about the nodes, both general information and
+    information specific to the script.
+
+validate::
+  * Runs on the local node
+  * Validate parameter values and node state based on collected
+    information. Can modify default values and report issues that
+    would prevent the script from applying successfully.
+
+apply::
+  * Runs on all or any cluster nodes
+  * Applies changes, returning information about the applied changes
+    to the local node.
+
+apply_local::
+  * Runs on the local node
+  * Applies changes to the cluster, where an action taken on a single
+    node affect the entire cluster. This includes updating the CIB in
+    Pacemaker, and also reloading the configuration for Corosync.
+
+report::
+  * Runs on the local node
+  * This is similar to the _apply_local_ action, with the difference
+    that the output of a Report action is not interpreted as JSON data
+    to be passed to the next action. Instead, the output is printed to
+    the screen.
+
+
+=== Basic structure ===
+
+The crm shell looks for scripts in two primary locations: Included
+scripts  are installed in the system-wide shared folder, usually
+`/usr/share/crmsh/scripts/`. Local and custom scripts are loaded from
+the user-local XDG_CONFIG folder, usually found at
+`~/.local/crm/scripts/`. These locations may differ depending on how
+the crm shell was installed and which system is used, but these are
+the locations used on most distributions.
+
+To create a new script, make a new folder in the user-local scripts
+folder and give it a unique name. In this example, we will call our
+new script `check-uptime`.
+
+........
+mkdir -p ~/.local/crm/scripts/check-uptime
+........
+
+In this directory, create a file called `main.yml`. This is a YAML
+document which describes the script, which parameters it requires, and
+what actions it will perform.
+
+YAML is a human-readable markup language which is designed to be easy
+to read and modify, while at the same time be compatible with JSON. To
+learn more, see http:://yaml.org/[yaml.org].
+
+Here is an example `main.yml` file which wraps the resource agent
+`ocf:heartbeat:IPaddr2`.
+
+[source,yaml]
+----
+# The version must be exactly 2.2, and must always be
+# specified in the script. If the version is missing or
+# is less than 2.2, the script is assumed to be a legacy
+# script (specified in the format used before crmsh 2.2).
+version: 2.2
+shortdesc: Virtual IP
+category: Basic
+include:
+  - agent: ocf:heartbeat:IPaddr2
+    name: virtual-ip
+    parameters:
+      - name: id
+        type: resource
+        required: true
+      - name: ip
+        type: ip_address
+        required: true
+      - name: cidr_netmask
+        type: integer
+        required: false
+      - name: broadcast
+        type: ip_address
+        required: false
+    ops: |
+      op start timeout="20" op stop timeout="20"
+      op monitor interval="10" timeout="20"
+actions:
+  - include: virtual-ip
+----
+
+For a bigger example, here is the `apache` agent which includes
+multiple optional steps, the optional installation of packages,
+defines multiple cluster resources and potentially calls bash commands
+on each of the cluster nodes.
+
+[source,yaml]
+----
+# Copyright (C) 2009 Dejan Muhamedagic
+# Copyright (C) 2015 Kristoffer Gronlund
+#
+# License: GNU General Public License (GPL)
+version: 2.2
+category: Server
+shortdesc: Apache Webserver
+longdesc: |
+  Configure a resource group containing a virtual IP address and
+  an instance of the Apache web server.
+
+  You can optionally configure a Filesystem resource which will be
+  mounted before the web server is started.
+
+  You can also optionally configure a database resource which will
+  be started before the web server but after mounting the optional
+  filesystem.
+include:
+  - agent: ocf:heartbeat:apache
+    name: apache
+    longdesc: |
+      The Apache configuration file specified here must be available via the
+      same path on all cluster nodes, and Apache must be configured with
+      mod_status enabled.  If in doubt, try running Apache manually via
+      its init script first, and ensure http://localhost:80/server-status is
+      accessible.
+    ops: |
+      op start timeout="40"
+      op stop timeout="60"
+      op monitor interval="10" timeout="20"
+  - script: virtual-ip
+    shortdesc: The IP address configured here will start before the Apache instance.
+    parameters:
+      - name: id
+        value: "{{id}}-vip"
+  - script: filesystem
+    shortdesc: Optional filesystem mounted before the web server is started.
+    required: false
+  - script: database
+    shortdesc: Optional database started before the web server is started.
+    required: false
+parameters:
+  - name: install
+    type: boolean
+    shortdesc: Install and configure apache
+    value: false
+actions:
+  - install:
+      - apache2
+    shortdesc: Install the apache package
+    when: install
+  - service:
+      - apache: disable
+    shortdesc: Let cluster manage apache
+    when: install
+  - call: a2enmod status; true
+    shortdesc: Enable status module
+    when: install
+  - include: filesystem
+  - include: database
+  - include: virtual-ip
+  - include: apache
+  - cib: |
+      group g-{{id}}
+        {{filesystem:id}}
+        {{database:id}}
+        {{virtual-ip:id}}
+        {{id}}
+----
+
+The language for referring to parameter values in `cib` actions is
+described below.
+
+=== Command arguments ===
+
+The actions that accept a command as argument must not refer to
+commands written in python. They can be plain bash scripts or any
+other executable script as long as the nodes have the necessary
+dependencies installed. However, see below why implementing scripts in
+Python is easier.
+
+Actions report their progress either by returning JSON on standard
+output, or by returning a non-zero return value and printing an error
+message to standard error.
+
+Any JSON returned by an action will be available to the following
+steps in the script. When the script executes, it does so in a
+temporary folder created for that purpose. In that folder is a file
+named `script.input`, containing a JSON array with the output produced
+by previous steps.
+
+The first element in the array (the zeroth element, to be precise) is
+a dict containing the parameter values. 
+
+The following elements are dicts with the hostname of each node as key
+and the output of the action generated by that node as value.
+
+In most cases, only local actions (`validate` and `apply_local`) will
+use the information in previous steps, but scripts are not limited in
+what they can do.
+
+With this knowledge, we can implement `fetch.py` and `report.py`.
+
+`fetch.py`:
+
+[source,python]
+----
+#!/usr/bin/env python
+import crm_script as crm
+try:
+    uptime = open('/proc/uptime').read().split()[0]
+    crm.exit_ok(uptime)
+except:
+    crm.exit_fail("Couldn't open /proc/uptime")
+----
+
+`report.py`:
+
+[source,python]
+----
+#!/usr/bin/env python
+import crm_script as crm
+show_all = crm.is_true(crm.param('show_all'))
+uptimes = crm.output(1).items()
+max_uptime = 0, ''
+for host, uptime in uptimes:
+    if uptime > max_uptime[0]:
+        max_uptime = uptime, host
+if show_all:
+    print "Uptimes: %s" % (', '.join("%s: %s" % v for v in uptimes))
+print "Longest uptime is %s seconds on host %s" % max_uptime
+----
+
+See below for more details on the helper library `crm_script`.
+
+Save the scripts as executable files in the same directory as the
+`main.yml` file.
+
+Before running the script, it is possible to verify that the files are
+in a valid format and in the right location. Run the following
+command:
+
+........
+crm script verify check-uptime
+........
+
+If the verification is successful, try executing the script with the
+following command:
+
+........
+crm script run check-uptime
+........
+
+Example output:
+
+[source,bash]
+----
+# crm script run check-uptime
+INFO: Check uptime of nodes
+INFO: Nodes: ha-three, ha-one
+OK: Fetch uptimes
+OK: Report uptime
+Longest uptime is 161054.04 seconds on host ha-one
+----
+
+To see if the `show_all` parameter works as intended, run the
+following:
+
+........
+crm script run check-uptime show_all=yes
+........
+
+Example output:
+
+[source,bash]
+----
+# crm script run check-uptime show_all=yes
+INFO: Check uptime of nodes
+INFO: Nodes: ha-three, ha-one
+OK: Fetch uptimes
+OK: Report uptime
+Uptimes: ha-one: 161069.83, ha-three: 159950.38
+Longest uptime is 161069.83 seconds on host ha-one
+----
+
+=== Remote permissions ===
+
+Some scripts may require super-user access to remote or local
+nodes. It is recommended that this is handled through SSH certificates
+and agents, to facilitate password-less access to nodes.
+
+=== Running scripts without a cluster ===
+
+All cluster scripts can optionally take a `nodes` argument, which
+determines the nodes that the script will run on. This node list is
+not limited to nodes already in the cluster. It is even possible to
+execute cluster scripts before a cluster is set up, such as the
+`health` and `init` scripts used by the `cluster` sub-level.
+
+........
+crm script run health nodes=example1,example2
+........
+
+The list of nodes can be comma- or space-separated, but if the list
+contains spaces, the whole argument will have to be quoted:
+
+........
+crm script run health nodes="example1 example2"
+........
+
+=== Running in validate mode ===
+
+It may be desirable to do a dry-run of a script, to see if any
+problems are present that would make the script fail before trying to
+apply it. To do this, add the argument `dry_run=yes` to the invocation:
+
+.........
+crm script run health dry_run=yes
+.........
+
+The script execution will stop at the first `apply` action. Note that
+non-modifying steps that happen after the first `apply` action will
+not be performed in a dry run.
+
+=== Helper library ===
+
+When the script data is copied to each node, a small helper library is
+also passed along with the script. This library can be found in
+`utils/crm_script.py` in the source repository. This library helps
+with producing output in the correct format, parsing the
+`script.input` data provided to scripts, and more.
+
+.`crm_script` API
+`host()`::
+    Returns hostname of current node
+`get_input()`::
+    Returns the input data list. The first element in the list
+    is a dict of the script parameters. The rest are the output
+    from previous steps.
+`parameters()`::
+    Returns the script parameters as a dict.
+`param(name)`::
+    Returns the value of the named script parameter.
+`output(step_idx)`::
+    Returns the output of the given step, with the first step being step 1.
+`exit_ok(data)`::
+    Exits the step returning `data` as output.
+`exit_fail(msg)`::
+    Exits the step returning `msg` as error message.
+`is_true(value)`::
+    Converts a truth value from string to boolean.
+`call(cmd, shell=False)`::
+    Perform a system call. Returns `(rc, stdout, stderr)`.
+
+=== The handles language ===
+
+CIB configurations and commands can refer to the value of parameters
+in the text of the action. This is done using a custom language,
+similar to handlebars.
+
+The language accepts the following constructions:
+
+............
+{{name}} = Inserts the value of the parameter <name>
+{{script:name}} = Inserts the value of the parameter <name> from the
+                  included script named <script>.
+{{#name}} ... {{/name}} = Inserts the text between the mustasches when
+                          name is truthy.
+{{^name}} ... {{/name}} = Inserts the text between the mustasches when
+                          name is falsy.
+............

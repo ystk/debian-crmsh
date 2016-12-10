@@ -1,0 +1,53 @@
+; crmsh configuration file
+; To override per user, create a file ~/.config/crm/crm.conf
+;
+; [core]
+; editor = $EDITOR
+; pager = $PAGER
+; user =
+; skill_level = expert
+; sort_elements = yes
+; check_frequency = always
+; check_mode = strict
+; wait = no
+; add_quotes = yes
+; manage_children = ask
+; force = no
+; debug = no
+; ptest = ptest, crm_simulate
+; dotty = dotty
+; dot = dot
+; ignore_missing_metadata = no
+; report_tool_options =
+
+[path]
+; sharedir = <detected>
+; cache = <detected>
+; crm_config = <detected>
+; crm_daemon_dir = <detected>
+crm_daemon_user = @CRM_DAEMON_USER@
+ocf_root = @OCF_ROOT_DIR@
+; crm_dtd_dir = <detected>
+; pe_state_dir = <detected>
+; heartbeat_dir = <detected>
+; hb_delnode = /usr/share/heartbeat/hb_delnode
+; nagios_plugins = /usr/lib/nagios/plugins
+
+; [color]
+; style = color
+; error = red bold
+; ok = green bold
+; warn = yellow bold
+; info = cyan
+; help_keyword = blue bold underline
+; help_header = normal bold
+; help_topic = yellow bold
+; help_block = cyan
+; keyword = yellow
+; identifier = normal
+; attr_name = cyan
+; attr_value = red
+; resource_reference = green
+; id_reference = green
+; score = magenta
+; ticket = magenta
