@@ -1,7 +1,7 @@
 ASCIIDOC := asciidoc
 CRMCONF := crm.conf
 SRC := faq.adoc documentation.adoc development.adoc installation.adoc \
-	configuration.adoc about.adoc rsctest-guide.adoc \
+	configuration.adoc about.adoc rsctest-guide.adoc download.adoc \
 	history-guide.adoc start-guide.adoc man-1.2.adoc scripts.adoc man-2.0.adoc
 HISTORY_LISTINGS = include/history-guide/nfs-probe-err.typescript \
 	include/history-guide/sample-cluster.conf.crm \
@@ -130,6 +130,7 @@ gen/atom.xml: $(NEWSDOC)
 	python ./make-news.py gen/atom.xml $(NEWS)
 
 site: gen/atom.xml gen/index.html gen/404.html gen/news/index.html gen/man/index.html $(TGT) $(CSS) $(IMG) $(FONTS) $(NEWSDOC)
+	@which dos2unix >/dev/null && find gen -name "*.html" -type f -exec dos2unix {} \;
 
 deploy: site
 	@echo "TODO: CVS upload"

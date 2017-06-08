@@ -14,10 +14,7 @@ def rpm_info():
     return crm_script.rpmcheck(PACKAGES)
 
 def logrotate_info():
-    rc, _, _ = crm_script.call(
-        'grep -r corosync.conf /etc/logrotate.d',
-        shell=True)
-    return {'corosync.conf': rc == 0}
+    return {}
 
 def sys_info():
     sysname, nodename, release, version, machine = os.uname()
@@ -27,7 +24,7 @@ def sys_info():
     #processes. The last column displays the last process ID used.
     system, node, release, version, machine, processor = platform.uname()
     distname, distver, distid = platform.linux_distribution()
-    hostname = platform.node().split('.')[0]
+    hostname = os.uname()[1]
 
     uptime = open('/proc/uptime').read().split()
     loadavg = open('/proc/loadavg').read().split()

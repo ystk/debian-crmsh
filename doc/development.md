@@ -31,6 +31,43 @@ make
 If everything worked out as it should, the website should now be
 generated in `doc/website-v1/gen`.
 
+## Test suite
+
+There are two separate test suites for crmsh:
+
+* `test/unittests` - These are unit tests that test small pieces of
+  code or functionality. To run these tests, run the `test/run` script
+  from the project root.
+
+* `test/testcases` - These are larger integration tests which require
+  a Pacemaker installation on the machine where the tests are to
+  run. Usually, we run these tests using the OBS and the `osc` command
+  line tool:
+
+  1. Check out the crmsh python package to a directory (usually
+  `~/build-service/network:ha-clustering:Factory/crmsh`)
+
+  2. Replace the tarball for crmsh in the OBS project with an archive
+  built from the current source tree. Replace the version number with
+  whatever version is the current one on OBS:
+
+    git archive --format=tar --prefix=crmsh-2.3.0+git.1470991992.7deaa3a/ -o <tmpdir>/crmsh-2.3.0+git.1470991992.7deaa3a.tar HEAD
+    bzip2 <tmpdir>/crmsh-2.3.0+git.1470991992.7deaa3a.tar
+    cp <tmpdir>/crmsh-2.3.0+git.1470991992.7deaa3a.tar.bz2 ~/build-service/network:ha-clustering:Factory/crmsh/crmsh-2.3.0+git.1470991992.7deaa3a.tar.bz2
+
+  3. Build the rpm package for crmsh with the `with_regression_tests`
+  flag set to 1:
+
+    cd ~/build-service/network:ha-clustering:Factory/crmsh
+    osc build -d --no-verify --release=1 --define with_regression_tests 1 openSUSE_Tumbleweed x86_64 crmsh.spec
+
+To simplify this process, there is a utility called `obs` which can be
+downloaded here: https://github.com/krig/obs-scripts
+
+Using the `obs` script, the above is reduced to calling `obs test
+factory`, given an appropriate `obs.conf` file. See the README in the
+obs-scripts project for more details on using `obs`.
+
 ## Modules
 
 This is the list of all modules including short descriptions.
@@ -41,12 +78,12 @@ This is the list of all modules including short descriptions.
     missing crmsh module, and report an understandable error message
     in either case.
 
-- `modules/main.py`
+- `crmsh/main.py`
 
     This is where execution really starts. Verifies the environment
 	and detects the pacemaker version.
 
-- `modules/config.py`
+- `crmsh/config.py`
 
     Reads the `crm.conf` configuration file and tries to detect basic
     information about where pacemaker is located etc. Some magic is
@@ -54,19 +91,19 @@ This is the list of all modules including short descriptions.
     so that the rest of the code can access configuration variables
     directly.
 
-- `modules/constants.py`
+- `crmsh/constants.py`
 
     Various hard-coded constants. Many of these should probably be
     read from pacemaker metadata for better compatibility across
     different versions.
  
-- `modules/ui_*.py`
+- `crmsh/ui_*.py`
 
     The UI context (`ui_context.py`) parses the input command and
     keeps track of which is the current level in the UI. `ui_root.py`
     is the root of the UI hierarchy.
 
-- `modules/help.py`
+- `crmsh/help.py`
 
 	Reads help from a text file and presents parts of it in
 	response to the help command. The text file has special
@@ -80,7 +117,7 @@ This is the list of all modules including short descriptions.
 	reflected here. _Actually, every user interface change has to
 	start here_. A source for the +crm(8)+ man page too.
 
-- `modules/cibconfig.py`
+- `crmsh/cibconfig.py`
 
 	Configuration (CIB) manager. Implements the configure level.
 	The bigest and the most complex part. There are three major
@@ -98,95 +135,95 @@ This is the list of all modules including short descriptions.
 	of cib elements. Most operations are going via these
 	subclasses (+show+, +edit+, +save+, +filter+).
 
-- `modules/scripts.py`
+- `crmsh/scripts.py`
 
     Implements the cluster scripts. Reads multiple kinds of script
     definition languages including the XML wizard format used by
     Hawk.
 
-- `modules/handles.py`
+- `crmsh/handles.py`
 
     A primitive handlebar-style templating language used in cluster
     scripts.
 
-- `modules/idmgmt.py`
+- `crmsh/idmgmt.py`
 
 	CIB id management. Guarantees that all ids are unique.
 	A helper for CibFactory.
 
-- `modules/parse.py`
+- `crmsh/parse.py`
 
     Parses CLI -> XML.
 
-- `modules/cliformat.py`
+- `crmsh/cliformat.py`
 
     Parses XML -> CLI.
 
     Not as cleanly separated as the CLI parser, mostly a set of
     functions called from `cibconfig.py`.
 
-- `modules/clidisplay.py`, `modules/term.py`
+- `crmsh/clidisplay.py`, `crmsh/term.py`
 
 	Applies colors to terminal output.
 
-- `modules/crm_gv.py`
+- `crmsh/crm_gv.py`
 
 	Interface to GraphViz. Generates graph specs for dotty(1).
 
-- `modules/cibstatus.py`
+- `crmsh/cibstatus.py`
 
 	CIB status section editor and manipulator (cibstatus
 	level). Interface to crm_simulate.
 
-- `modules/ra.py`
+- `crmsh/ra.py`
 
 	Resource agents interface.
 
-- `modules/rsctest.py`
+- `crmsh/rsctest.py`
 
 	Resource tester (configure rsctest command).
 
-- `modules/history.py`
+- `crmsh/history.py`
 
 	Cluster history. Interface to logs and other artifacts left
 	on disk by the cluster.
 
-- `modules/log_patterns.py`, `log_patterns_118.py`
+- `crmsh/log_patterns.py`, `log_patterns_118.py`
 
 	Pacemaker subsystems' log patterns. For versions earlier than
 	1.1.8 and the latter.
 
-- `modules/schema.py`, `pacemaker.py`
+- `crmsh/schema.py`, `pacemaker.py`
 
 	Support for pacemaker RNG schema.
 
-- `modules/cache.py`
+- `crmsh/cache.py`
 
     A very rudimentary cache implementation. Used to cache
 	results of expensive operations (i.e. ra meta).
 
-- `modules/crm_pssh.py`
+- `crmsh/crm_pssh.py`
 
     Interface to the parallax library for remote SSH commands.
 
-- `modules/corosync.py`
+- `crmsh/corosync.py`
 
     Parse and edit the `corosync.conf` configuration file.
 
-- `modules/msg.py`
+- `crmsh/msg.py`
 
 	Messages for users. Can count lines and include line
 	numbers. Needs refinement.
 
-- `modules/utils.py`
+- `crmsh/utils.py`
 
 	A bag of useful functions. Needs more order.
 
-- `modules/xmlutil.py`
+- `crmsh/xmlutil.py`
 
 	A bag of useful XML functions. Needs more order.
 
-## Code improvements
+## Code improvements / TODO
 
 These are some thoughts on how to improve maintainability and
 make crmsh nicer. Mostly for people looking at the code, the
@@ -194,6 +231,58 @@ users shouldn't notice much (or any) difference.
 
 Everybody's invited to comment and make further suggestions, in
 particular experienced pythonistas.
+
+### Syntax bug with automatic constraint handling
+
+See issue on github https://github.com/ClusterLabs/crmsh/issues/140 .
+
+The problem is the sequence of modifications: crmsh tries to be too
+smart and changes the constraint which refers to all members of the
+group so that it now refers to the group. But when the group is
+then deleted, the constraint is also deleted.
+
+### Rewrite the hb_report script completely in Python
+
+Right now, the `hb_report` script is written in bash. This means it
+has some duplicated code, for example finding pacemaker binaries,
+with crmsh. It also means that it can be difficult to debug and
+maintain. It would be better if it was completely implemented in
+Python.
+
+### Python 3 compatibility
+
+The code is currently only compatible with Python 2.6+. We will need
+to port crmsh to Python 3 eventually. The best solution for this is
+probably using the six python library which enables code which is
+both Python 2 and Python 3-compatible.
+
+### Validate more using pacemaker schema
+
+- We have the pacemaker CIB schema available (see schema.py),
+however using it is difficult and so it is not used in enough
+places.
+
+### Investigate switching to python-prompt-toolkit
+
+Either switch crmsh over to using the prompt toolkit for
+implementing the interactive mode, or at least look at it
+to see what ideas we can lift.
+
+https://github.com/jonathanslenders/python-prompt-toolkit
+
+### History transition should be able to save the graph to a file
+
+See https://github.com/ClusterLabs/crmsh/issues/98
+
+### Add support for ordering attribute on resource sets
+
+See https://github.com/ClusterLabs/crmsh/issues/84
+
+### Better version detection
+
+Be better at detecting and handling the Pacemaker version.
+Ensure backwards compatibility, for example with old vs.
+new ACL command syntax.
 
 ### Syntax highlighting
 
@@ -222,4 +311,4 @@ particular experienced pythonistas.
 ### Bad namespace separation
 
 - xmlutil and utils are just a loose collection of functions,
-  need to be organized better (get rid of 'from xyz import *')
+need to be organized better (get rid of 'from xyz import *')

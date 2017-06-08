@@ -4,6 +4,7 @@
 # unit tests for cliformat.py
 
 from crmsh import cibconfig
+from crmsh import parse
 from lxml import etree
 from .test_parse import MockValidation
 from nose.tools import eq_, with_setup
@@ -15,8 +16,9 @@ def assert_is_not_none(thing):
     assert thing is not None, "Expected non-None value"
 
 
-def roundtrip(cli, debug=False, expected=None):
-    node, _, _ = cibconfig.parse_cli_to_xml(cli, validation=MockValidation())
+def roundtrip(cli, debug=False, expected=None, format_mode=-1, strip_color=False):
+    parse.validator = MockValidation()
+    node, _, _ = cibconfig.parse_cli_to_xml(cli)
     assert_is_not_none(node)
     obj = factory.find_object(node.get("id"))
     if obj:
@@ -24,10 +26,13 @@ def roundtrip(cli, debug=False, expected=None):
     obj = factory.create_from_node(node)
     assert_is_not_none(obj)
     obj.nocli = True
-    xml = obj.repr_cli(format=-1)
+    xml = obj.repr_cli(format_mode=format_mode)
     print xml
     obj.nocli = False
-    s = obj.repr_cli(format=-1)
+    s = obj.repr_cli(format_mode=format_mode)
+    if strip_color:
+        import re
+        s = re.sub(r"\$\{[^}]+\}", "", s)
     if (s != cli) or debug:
         print "GOT:", s
         print "EXP:", cli
@@ -86,19 +91,19 @@ def test_broken_colo():
     data = etree.fromstring(xml)
     obj = factory.create_from_node(data)
     assert_is_not_none(obj)
-    data = obj.repr_cli(format=-1)
+    data = obj.repr_cli(format_mode=-1)
     eq_('colocation colo-2 inf: [ vip1 vip2 sequential=true ] [ apache:Master sequential=true ]', data)
     assert obj.cli_use_validate()
 
 
 @with_setup(setup_func, teardown_func)
 def test_comment():
-    roundtrip("# comment 1\nprimitive d0 ocf:pacemaker:Dummy")
+    roundtrip("# comment 1\nprimitive d0 ocf:pacemaker:Dummy", format_mode=0, strip_color=True)
 
 
 @with_setup(setup_func, teardown_func)
 def test_comment2():
-    roundtrip("# comment 1\n# comment 2\n# comment 3\nprimitive d0 ocf:pacemaker:Dummy")
+    roundtrip("# comment 1\n# comment 2\n# comment 3\nprimitive d0 ocf:pacemaker:Dummy", format_mode=0, strip_color=True)
 
 
 @with_setup(setup_func, teardown_func)
@@ -129,7 +134,7 @@ value="Stopped"/> \
     data = etree.fromstring(xml)
     obj = factory.create_from_node(data)
     assert_is_not_none(obj)
-    data = obj.repr_cli(format=-1)
+    data = obj.repr_cli(format_mode=-1)
     print data
     exp = 'primitive dummy ocf:pacemaker:Dummy op start timeout=60 interval=0 op stop timeout=60 interval=0 op monitor interval=60 timeout=30 meta target-role=Stopped'
     eq_(exp, data)
@@ -152,7 +157,7 @@ value="Stopped"/> \
     data = etree.fromstring(xml)
     obj = factory.create_from_node(data)
     assert_is_not_none(obj)
-    data = obj.repr_cli(format=-1)
+    data = obj.repr_cli(format_mode=-1)
     print data
     exp = 'primitive dummy2 ocf:pacemaker:Dummy meta target-role=Stopped ' \
           'op start timeout=60 interval=0 op stop timeout=60 interval=0 ' \
@@ -174,9 +179,31 @@ target="ha-one"></fencing-level>
     data = etree.fromstring(xml)
     obj = factory.create_from_node(data)
     assert_is_not_none(obj)
-    data = obj.repr_cli(format=-1)
+    data = obj.repr_cli(format_mode=-1)
     print data
     exp = 'fencing_topology st1'
+    eq_(exp, data)
+    assert obj.cli_use_validate()
+
+
+@with_setup(setup_func, teardown_func)
+def test_fencing2():
+    xml = """<fencing-topology>
+    <fencing-level devices="apple" id="fencing" index="1"
+target-pattern="green.*"></fencing-level>
+    <fencing-level devices="pear" id="fencing" index="2"
+target-pattern="green.*"></fencing-level>
+    <fencing-level devices="pear" id="fencing" index="1"
+target-pattern="red.*"></fencing-level>
+    <fencing-level devices="apple" id="fencing" index="2"
+target-pattern="red.*"></fencing-level>
+  </fencing-topology>"""
+    data = etree.fromstring(xml)
+    obj = factory.create_from_node(data)
+    assert_is_not_none(obj)
+    data = obj.repr_cli(format_mode=-1)
+    print data
+    exp = 'fencing_topology pattern:green.* apple pear pattern:red.* pear apple'
     eq_(exp, data)
     assert obj.cli_use_validate()
 
@@ -252,6 +279,15 @@ def test_new_role():
 def test_topology_1114():
     roundtrip('fencing_topology attr:rack=1 node1,node2')
 
+@with_setup(setup_func, teardown_func)
+def test_topology_1114_pattern():
+    roundtrip('fencing_topology pattern:.* network disk')
+
+
+@with_setup(setup_func, teardown_func)
+def test_locrule():
+    roundtrip('location loc-testfs-with-eth1 testfs rule ethmonitor-eth1 eq 1')
+
 
 @with_setup(setup_func, teardown_func)
 def test_is_value_sane():
@@ -261,3 +297,24 @@ def test_is_value_sane():
 @with_setup(setup_func, teardown_func)
 def test_is_value_sane_2():
     roundtrip('primitive p1 dummy params state="bo\\"o"')
+
+
+@with_setup(setup_func, teardown_func)
+def test_alerts_1():
+    roundtrip('alert alert1 "/tmp/foo.sh" to "/tmp/bar.log"')
+
+@with_setup(setup_func, teardown_func)
+def test_alerts_2():
+    roundtrip('alert alert2 "/tmp/foo.sh" attributes foo=bar to "/tmp/bar.log"')
+
+@with_setup(setup_func, teardown_func)
+def test_alerts_3():
+    roundtrip('alert alert3 "a path here" meta baby to "/tmp/bar.log"')
+
+@with_setup(setup_func, teardown_func)
+def test_alerts_4():
+    roundtrip('alert alert4 "/also/a/path"')
+
+@with_setup(setup_func, teardown_func)
+def test_alerts_5():
+    roundtrip('alert alert5 "/a/path" to { "/another/path" } meta timeout=30s')

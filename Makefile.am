@@ -20,8 +20,6 @@
 #
 MAINTAINERCLEANFILES    = Makefile.in aclocal.m4 configure
 
-sbin_SCRIPTS		= crm
-
 # in .spec, set --sysconfdir=/etc
 
 # Documentation
@@ -68,21 +66,16 @@ all-local:
 		--build-base $(shell readlink -f $(builddir))/build \
 		--verbose)
 
-# Fix for GNU/Linux
-if UNAME_IS_DEBIAN
-python_prefix = 
-else
-python_prefix = --prefix=$(DESTDIR)$(prefix)
-endif
+python_prefix = --prefix=$(prefix)
 
 install-exec-local:
 	-mkdir -p $(DESTDIR)$(pkgpythondir)
 	$(PYTHON) $(srcdir)/setup.py install \
+		--root $(DESTDIR)/// \
 		$(python_prefix) \
 		--record $(DESTDIR)$(pkgpythondir)/install_files.txt \
 		--verbose
-	$(INSTALL) -d -m 770 $(DESTDIR)/$(CRM_CACHE_DIR)
-	-rm -rf $(generated_docs) $(generated_mans)
+	$(INSTALL) -d -m 770 $(DESTDIR)$(CRM_CACHE_DIR)
 
 uninstall-local:
 	cat $(DESTDIR)$(pkgpythondir)/install_files.txt | xargs rm -rf

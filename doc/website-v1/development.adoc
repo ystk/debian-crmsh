@@ -1,14 +1,10 @@
 = Development =
 
-`crmsh` is a free software project, and is open to contributors.
-Patches, comments, documentation, testing and so on are
-all very much welcome!
-
 == Tools ==
 
 ++++
 <ul class="nav">
-<li><a href="https://github.com/ClusterLabs/crmsh"><i class="fa fa-archive fa-3x fa-fw"></i> Source Repository</a></li>
+<li><a href="https://github.com/ClusterLabs/crmsh"><i class="fa fa-code-fork fa-3x fa-fw"></i> Source Repository</a></li>
 <li><a href="http://clusterlabs.org/mailman/listinfo/users"><i class="fa fa-envelope fa-3x fa-fw"></i> Mailing List</a></li>
 <li><a href="https://github.com/ClusterLabs/crmsh/issues"><i class="fa fa-bug fa-3x fa-fw"></i> Issue Tracker</a></li>
 <li><a href="irc://freenode.net/#clusterlabs"><i class="fa fa-comments fa-3x fa-fw"></i> IRC: #clusterlabs on Freenode</a></li>
@@ -16,7 +12,7 @@ all very much welcome!
 </ul>
 ++++
 
-== Get the source ==
+== Source Code ==
 
 The source code for `crmsh` is kept in a
 http://git-scm.com/[git] repository
@@ -26,12 +22,23 @@ hosted at https://github.com[github]. Use +git+ to get a working copy:
 git clone https://github.com/ClusterLabs/crmsh.git
 ----
 
-`crmsh` needs the development headers for link:http://hg.linux-ha.org/glue[cluster-glue] and 
-link:https://github.com/ClusterLabs/pacemaker[pacemaker] when
-installing. On openSUSE, these are packaged as `libglue-devel` and
-`libpacemaker-devel`.
+Dependencies
+~~~~~~~~~~~~
 
-.Building
+Building and installing crmsh requires Python version 2.6 and up (but not 3, yet).
+
+Additionally, the following Python modules are needed:
+
+* `lxml`
+* `setuptools`
+* `parallax`
+* `dateutil`
+
+Building
+~~~~~~~~
+
+`crmsh` uses the autotools suite to manage the build process.
+
 ----
 ./autogen.sh
 ./configure
@@ -52,7 +59,11 @@ and call:
 ----
 
 `crmsh` also comes with a comprehensive regression test suite. The regression tests need
-to run after installation, on a system which has both crmsh and pacemaker installed.
+to run after installation, on a system which has both crmsh and pacemaker installed. You
+will also need to install +pacemaker+ and the +cluster-glue+ development headers.
+
+* link:http://hg.linux-ha.org/glue[cluster-glue]
+* link:https://github.com/ClusterLabs/pacemaker[pacemaker]
 
 To execute the tests, call:
 

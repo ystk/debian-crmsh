@@ -14,7 +14,7 @@ ERROR: 2: Error when loading script haproxy: No meta-data for agent: systemd:hap
 .EXT crm_resource --show-metadata ocf:heartbeat:Raid1
 Basic:
 
-mailto           MailTo
+mailto           E-Mail
 virtual-ip       Virtual IP
 
 Database:
@@ -29,11 +29,17 @@ Filesystem:
 clvm             Cluster-aware LVM
 clvm-vg          Cluster-aware LVM (Volume Group)
 drbd             DRBD Block Device
-filesystem       Filesystem (mount point)
-gfs2             gfs2 filesystem (cloned)
-gfs2-base        gfs2 filesystem base (cloned)
-ocfs2            OCFS2 filesystem (cloned)
-raid-lvm         RAID hosting LVM
+filesystem       File System (mount point)
+gfs2             GFS2 File System (Cloned)
+lvm-drbd         LVM Group on DRBD
+ocfs2            OCFS2 File System
+raid-lvm         RAID Hosting LVM
+
+NFS:
+
+exportfs         NFS Exported File System
+nfsserver        NFS Server
+nfsserver-lvm-drbd NFS Server on LVM and DRBD
 
 SAP:
 
@@ -46,20 +52,19 @@ sap-simple-stack-plus SAP SimpleStack+ Instance
 Server:
 
 apache           Apache Webserver
-exportfs         NFS Exported File System
-nfsserver        NFS Server
 
 Stonith:
 
 libvirt          STONITH for libvirt (kvm / Xen)
 sbd              SBD, Shared storage based fencing
+vmware           Fencing using vCenter / ESX Server
 
 .INP: list all
 .EXT crm_resource --show-metadata systemd:haproxy
 ERROR: 3: Error when loading script haproxy: No meta-data for agent: systemd:haproxy
 Basic:
 
-mailto           MailTo
+mailto           E-Mail
 virtual-ip       Virtual IP
 
 Database:
@@ -74,11 +79,17 @@ Filesystem:
 clvm             Cluster-aware LVM
 clvm-vg          Cluster-aware LVM (Volume Group)
 drbd             DRBD Block Device
-filesystem       Filesystem (mount point)
-gfs2             gfs2 filesystem (cloned)
-gfs2-base        gfs2 filesystem base (cloned)
-ocfs2            OCFS2 filesystem (cloned)
-raid-lvm         RAID hosting LVM
+filesystem       File System (mount point)
+gfs2             GFS2 File System (Cloned)
+lvm-drbd         LVM Group on DRBD
+ocfs2            OCFS2 File System
+raid-lvm         RAID Hosting LVM
+
+NFS:
+
+exportfs         NFS Exported File System
+nfsserver        NFS Server
+nfsserver-lvm-drbd NFS Server on LVM and DRBD
 
 SAP:
 
@@ -92,6 +103,7 @@ Script:
 
 add              Add a new node to an already existing cluster
 check-uptime     Check uptime of nodes
+gfs2-base        GFS2 File System Base (Cloned)
 health           Check the health of the cluster
 init             Initialize a new cluster
 lvm              Controls the availability of an LVM Volume Group
@@ -99,17 +111,17 @@ raid1            Manages Linux software RAID (MD) devices on shared storage
 remove           Remove node from cluster
 sapdb            SAP Database Instance
 sapinstance      SAP Instance
+sbd-device       Create SBD Device
 
 Server:
 
 apache           Apache Webserver
-exportfs         NFS Exported File System
-nfsserver        NFS Server
 
 Stonith:
 
 libvirt          STONITH for libvirt (kvm / Xen)
 sbd              SBD, Shared storage based fencing
+vmware           Fencing using vCenter / ESX Server
 
 .INP: list names
 add
@@ -131,8 +143,10 @@ health
 init
 libvirt
 lvm
+lvm-drbd
 mailto
 nfsserver
+nfsserver-lvm-drbd
 ocfs2
 oracle
 raid-lvm
@@ -146,7 +160,9 @@ sap-simple-stack-plus
 sapdb
 sapinstance
 sbd
+sbd-device
 virtual-ip
+vmware
 .INP: list names all
 add
 apache
@@ -166,8 +182,10 @@ health
 init
 libvirt
 lvm
+lvm-drbd
 mailto
 nfsserver
+nfsserver-lvm-drbd
 ocfs2
 oracle
 raid-lvm
@@ -181,7 +199,9 @@ sap-simple-stack-plus
 sapdb
 sapinstance
 sbd
+sbd-device
 virtual-ip
+vmware
 .INP: list all names
 add
 apache
@@ -201,8 +221,10 @@ health
 init
 libvirt
 lvm
+lvm-drbd
 mailto
 nfsserver
+nfsserver-lvm-drbd
 ocfs2
 oracle
 raid-lvm
@@ -216,15 +238,16 @@ sap-simple-stack-plus
 sapdb
 sapinstance
 sbd
+sbd-device
 virtual-ip
+vmware
 .INP: list bogus
 ERROR: 7: script.list: Unexpected argument 'bogus': expected  [all|names]
 .INP: show mailto
 mailto (Basic)
-MailTo
+E-Mail
 
- This is a resource agent for MailTo. It sends email to a sysadmin
-whenever  a takeover occurs.
+Notifies recipient by e-mail in the event of a resource takeover.
 
 1. Notifies recipients by email in the event of resource takeover
 
@@ -253,7 +276,7 @@ whenever  a takeover occurs.
 	clone c-foo foo
 
 .INP: run mailto id=foo email=test@example.com subject=hello nodes=node1 dry_run=true
-INFO: 10: MailTo
+INFO: 10: E-Mail
 INFO: 10: Nodes: node1
 ** all - #!/usr/bin/env python
 import crm_script

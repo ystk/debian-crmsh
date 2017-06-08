@@ -96,3 +96,42 @@ property cib-bootstrap-options: \
 .EXT cib metadata
 .INP: _test
 .INP: verify
+.TRY Unknown properties
+.INP: configure
+.INP: erase
+INFO: 2: modified location:loc1 from g1 to gr2
+INFO: 2: constraint colocation:c2 updated
+INFO: 2: constraint colocation:c2 updated
+.INP: primitive st stonith:null 	params hostlist='node1' 	meta description="some description here" 	op start requires=nothing 	op monitor interval=60m
+.INP: property SAPHanaSR:     hana_ha1_site_lss_WDF1=4
+.INP: show
+node node1
+primitive st stonith:null \
+	params hostlist=node1 \
+	meta description="some description here" \
+	op start requires=nothing interval=0 \
+	op monitor interval=60m
+property SAPHanaSR: \
+	hana_ha1_site_lss_WDF1=4
+.INP: commit
+.EXT crm_resource --show-metadata stonith:null
+.EXT stonithd metadata
+.EXT pengine metadata
+.INP: _test
+.INP: verify
+.INP: property SAPHanaSR_2:     hana_ha1_site_iss_WDF1=cde     hana_ha1_site_bss_WDF1=abc
+.INP: show
+node node1
+primitive st stonith:null \
+	params hostlist=node1 \
+	meta description="some description here" \
+	op start requires=nothing interval=0 \
+	op monitor interval=60m
+property SAPHanaSR: \
+	hana_ha1_site_lss_WDF1=4
+property SAPHanaSR_2: \
+	hana_ha1_site_iss_WDF1=cde \
+	hana_ha1_site_bss_WDF1=abc
+.INP: commit
+.INP: _test
+.INP: verify

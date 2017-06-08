@@ -8,7 +8,7 @@ dnl License: GNU General Public License (GPL)
 
 AC_PREREQ([2.53])
 
-AC_INIT([crmsh],[2.2.0],[users@clusterlabs.org])
+AC_INIT([crmsh],[2.3.2],[users@clusterlabs.org])
 
 AC_ARG_WITH(version,
     [  --with-version=version   Override package version (if you're a packager needing to pretend) ],
@@ -40,8 +40,6 @@ dnl normal compilation.  When a failure occurs, it will then display the full
 dnl command line
 dnl Wrap in m4_ifdef to avoid breaking on older platforms
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES])
-
-AM_CONDITIONAL([UNAME_IS_DEBIAN], [test x`uname -v | grep -oh Debian` = x"Debian"])
 
 AC_SUBST(OCF_ROOT_DIR)
 AC_SUBST(CRM_DAEMON_USER)

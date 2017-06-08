@@ -3,49 +3,47 @@
 #
 # License: GNU General Public License (GPL)
 version: 2.2
-shortdesc: gfs2 filesystem (cloned)
+shortdesc: GFS2 File System (Cloned)
 longdesc: >- 
-  This template generates a cloned instance of the gfs2 filesystem.
-  The filesystem should be on the device, unless cLVM is used.
+  This template generates a cloned instance of the GFS2 file system.
+  The file system should be on the device, unless cLVM is used.
 
-category: Filesystem
+category: File System
 include:
   - script: gfs2-base
 parameters:
   - name: id
-    shortdesc: Name the gfs2 filesystem
+    shortdesc: File System Resource ID
     longdesc: "NB: The clone is going to be named c-<id> (e.g. c-bigfs)"
     example: bigfs
     required: true
     type: resource
   - name: directory
-    shortdesc: The mount point
+    shortdesc: Mount Point
     example: /mnt/bigfs
     required: true
     type: string
   - name: device
-    shortdesc: The device
+    shortdesc: Device
     required: true
     type: string
   - name: options
-    shortdesc: mount options
+    shortdesc: Mount Options
     type: string
     required: false
 actions:
   - include: gfs2-base
   - cib: |
-      primitive {{id}} ocf:heartbeat:Filesystem
-        params
+      primitive {{id}} Filesystem
         directory="{{directory}}"
-        fstype="gfs2"
         device="{{device}}"
+        fstype=gfs2
         {{#options}}options="{{options}}"{{/options}}
-
-      monitor {{id}} 20:40
+        op monitor interval=20s timeout=40s
 
       clone c-{{id}} {{id}}
-        meta interleave="true" ordered="true"
+        meta interleave=true ordered=true
 
   - crm: "configure modgroup {{gfs2-base:clvm-group}} add c-{{id}}"
-    shortdesc: Add cloned filesystem to cLVM group
+    shortdesc: Add cloned file system to cLVM group
     when: "{{gfs2-base:clvm-group}}"
