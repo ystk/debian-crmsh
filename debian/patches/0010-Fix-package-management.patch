@@ -1,0 +1,147 @@
+Description: Use dpkg and apt for package management
+Author: Valentin Vidic <Valentin.Vidic@CARNet.hr>
+Last-Update: 2016-11-19
+--- a/utils/crm_rpmcheck.py
++++ b/utils/crm_rpmcheck.py
+@@ -22,14 +22,13 @@
+     """
+     Gathers version and release information about a package.
+     """
+-    _qfmt = 'version: %{VERSION}\nrelease: %{RELEASE}\n'
+-    rc, out, err = run(['/bin/rpm', '-q', '--queryformat=' + _qfmt, pkg])
++    rc, out, err = run(['/usr/bin/dpkg', '--status', pkg])
+     if rc == 0:
+         data = {'name': pkg}
+         for line in out.split('\n'):
+             info = line.split(':', 1)
+             if len(info) == 2:
+-                data[info[0].strip()] = info[1].strip()
++                data[info[0].strip().lower()] = info[1].strip()
+         return data
+     else:
+         return {'name': pkg, 'error': "package not installed"}
+--- a/utils/crm_pkg.py
++++ b/utils/crm_pkg.py
+@@ -207,7 +207,82 @@
+ 
+ 
+ class Apt(PackageManager):
+-    pass
++    def __init__(self):
++        self._apt = is_program('apt-get')
++        self._dpkg = is_program('dpkg')
++        if self._apt is None or self._dpkg is None:
++            raise OSError("Missing tools: %s, %s" % (self._apt, self._dpkg))
++
++    def get_version(self, name):
++        cmd = [self._dpkg, '--status', name]
++        rc, stdout, stderr = run(cmd)
++        if rc == 0:
++            for line in stdout.splitlines():
++                info = line.split(':', 1)
++                if len(info) == 2 and info[0] == 'Version':
++                    return info[1].strip()
++        return None
++
++    def is_installed(self, name):
++        cmd = [self._dpkg, '--status', name]
++        rc, stdout, stderr = run(cmd)
++        if rc == 0:
++            for line in stdout.splitlines():
++                info = line.split(':', 1)
++                if len(info) == 2 and info[0] == 'Status':
++                    return info[1].strip().endswith('installed')
++        return False
++
++    def present(self, name):
++        if self.is_installed(name):
++            return (0, '', '', False)
++
++        if DRY_RUN:
++            return (0, '', '', True)
++
++        cmd = [self._apt,
++               '--assume-yes',
++               '--quiet',
++               'install',
++               name]
++        rc, stdout, stderr = run(cmd)
++        changed = rc == 0
++        return (rc, stdout, stderr, changed)
++
++    def latest(self, name):
++        if not self.is_installed(name):
++            return self.present(name)
++
++        if DRY_RUN:
++            return (0, '', '', True)
++
++        pre_version = self.get_version(name)
++        cmd = [self._apt,
++               '--assume-yes',
++               '--quiet',
++               '--only-upgrade',
++               'install',
++               name]
++        rc, stdout, stderr = run(cmd)
++        post_version = self.get_version(name)
++        changed = pre_version != post_version
++        return (rc, stdout, stderr, changed)
++
++    def absent(self, name):
++        if not self.is_installed(name):
++            return (0, '', '', False)
++
++        if DRY_RUN:
++            return (0, '', '', True)
++
++        cmd = [self._apt,
++               '--assume-yes',
++               '--quiet',
++               'purge',
++               name]
++        rc, stdout, stderr = run(cmd)
++        changed = rc == 0
++        return (rc, stdout, stderr, changed)
+ 
+ 
+ class Pacman(PackageManager):
+@@ -226,7 +301,7 @@
+     managers = {
+         'zypper': Zypper,
+         'yum': Yum,
+-        #'apt-get': Apt,
++        'apt-get': Apt,
+         #'pacman': Pacman
+     }
+     for name, mgr in managers.iteritems():
+--- a/utils/crm_init.py
++++ b/utils/crm_init.py
+@@ -26,12 +26,12 @@
+ def service_info(service):
+     "Returns information about a given service"
+     active, enabled = 'unknown', 'unknown'
+-    rc, out, err = crm_script.call(["/usr/bin/systemctl", "is-enabled", "%s.service" % (service)])
++    rc, out, err = crm_script.call(["/bin/systemctl", "is-enabled", "%s.service" % (service)])
+     if rc in (0, 1, 3) and out:
+         enabled = out.strip()
+     else:
+         return {'name': service, 'error': err.strip()}
+-    rc, out, err = crm_script.call(["/usr/bin/systemctl", "is-active", "%s.service" % (service)])
++    rc, out, err = crm_script.call(["/bin/systemctl", "is-active", "%s.service" % (service)])
+     if rc in (0, 1, 3) and out:
+         active = out.strip()
+     else:
+--- a/utils/crm_script.py
++++ b/utils/crm_script.py
+@@ -123,8 +123,8 @@
+ 
+ def service(name, action):
+     if action.startswith('is-'):
+-        return call(['/usr/bin/systemctl', action, name + '.service'])
+-    return sudo_call(['/usr/bin/systemctl', action, name + '.service'])
++        return call(['/bin/systemctl', action, name + '.service'])
++    return sudo_call(['/bin/systemctl', action, name + '.service'])
+ 
+ 
+ def package(name, state):

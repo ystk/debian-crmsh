@@ -1,0 +1,23 @@
+Test-Command: crm --help
+Depends: @
+Restrictions: needs-root
+
+Test-Command: crm help
+Depends: @
+Restrictions: needs-root
+
+Test-Command: crm --version
+Depends: @
+Restrictions: needs-root
+
+Tests: utils.sh
+Depends: @
+Restrictions: needs-root, allow-stderr
+
+Tests: pacemaker-basic-resource.sh
+Depends: @, pacemaker, corosync
+Restrictions: needs-root, allow-stderr, isolation-container
+
+Tests: pacemaker-node-status.sh
+Depends: @, pacemaker, corosync
+Restrictions: needs-root, allow-stderr, isolation-container

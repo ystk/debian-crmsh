@@ -1,0 +1,81 @@
+From: Arturo Borrero Gonzalez <arturo.borrero.glez@gmail.com>
+Subject: Patch to avoid using the custom lexer
+ This patch makes some changes to the crmsh doc build so it doesn't use
+ the included custom lexer.
+Forwarded: not-needed
+Last-Update: 2016-09-23
+
+--- a/doc/website-v1/history-guide.adoc
++++ b/doc/website-v1/history-guide.adoc
+@@ -51,7 +51,7 @@
+ preparing this document we noticed that a probe failed repeatedly
+ on a node which wasn't even running the resource <<Listing 2>>.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 2: "]
+ .crm status output[[Listing 2]]
+ -----------------
+@@ -61,7 +61,7 @@
+ The history +resource+ command shows log messages relevant to the
+ supplied resource <<Listing 3>>.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 3: "]
+ .Logs on failed +nfs-server+ probe operation[[Listing 3]]
+ -----------------
+@@ -88,7 +88,7 @@
+ tracing of the resource agent. <<Listing 4>> shows how to do
+ that.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 4: "]
+ .Set `nfs-server` probe operation resource tracing[[Listing 4]]
+ -----------------
+@@ -126,7 +126,7 @@
+ To begin, we run the `info` command which gives an overview, as
+ shown in <<Listing 5>>.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 5: "]
+ .Basic history information[[Listing 5]]
+ -----------------
+@@ -155,7 +155,7 @@
+ The listing is annotated to explain the output in more detail.
+ 
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 6: "]
+ .Viewing transitions[[Listing 6]]
+ -----------------
+@@ -194,7 +194,7 @@
+ It may sometimes be useful to see what changed between two
+ transitions. History `diff` command is in action in <<Listing 7>>.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 7: "]
+ .Viewing transitions[[Listing 7]]
+ -----------------
+@@ -212,7 +212,7 @@
+ actions of that transition are yet to be executed. So, the status
+ section of transition _N_ corresponds to the configuration _N-1_.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 8: "]
+ .Full transition log[[Listing 8]]
+ -----------------
+@@ -232,7 +232,7 @@
+ 	  recommendable), then use the history `detail` command to
+ 	  increase the level of detail displayed.
+ 
+-[source,ansiclr]
++[source,c]
+ [caption="Listing 9: "]
+ .Resource related messages[[Listing 9]]
+ -----------------

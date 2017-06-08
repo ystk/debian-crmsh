@@ -1,0 +1,21 @@
+Description: Make cluster init work on Debian
+Author: Valentin Vidic <Valentin.Vidic@CARNet.hr>
+Last-Update: 2016-11-19
+--- a/scripts/init/corosync.conf.template
++++ b/scripts/init/corosync.conf.template
+@@ -27,7 +27,7 @@
+ 	fileline: off
+ 	to_stderr: no
+ 	to_logfile: no
+-	logfile: /var/log/cluster/corosync.log
++	logfile: /var/log/corosync/corosync.log
+ 	to_syslog: yes
+ 	debug: off
+ 	timestamp: on
+@@ -52,4 +52,4 @@
+ 	#provider: corosync_votequorum
+ 	#expected_votes: 2
+ %(quorum)s
+-}
+\ No newline at end of file
++}

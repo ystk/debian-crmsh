@@ -1,22 +1,20 @@
 = Documentation =
 
-`crmsh` begun as a bundled interface to the Pacemaker cluster manager,
-but has grown beyond simply configuring Pacemaker to handling many
-more aspects of the Linux HA stack. It also serves as the backend for
-the Hawk web interface.
-
 The main documentation for `crmsh` comes in the form of the 
-_manual_, which is the same help as found using the `help`
+`manual`, which is the same help as found using the `help`
 command in the interactive shell.
 
-Beyond this, we've also written a couple of guides and other documents
-that will hopefully make using the shell as simple and painless as
-possible.
+Additionally, there are a couple of guides and other documents
+that will hopefully make using the shell as easy as possible.
 
-== Documents ==
+== Manual ==
 
-* link:/man[Manual (Development)], link:/man-2.0[(Release 2.x)], link:/man-1.2[(Release 1.2)]
-* link:/installation[Installation]
+* link:/man[Manual (Development)]
+* link:/man-2.0[Manual (v2.x)]
+* link:/man-1.2[Manual (v1.2.x)]
+
+== Guides ==
+
 * link:/start-guide[Getting Started]
 * link:/history-guide[History Guide]
 * link:/rsctest-guide[Resource Testing Guide]
@@ -39,6 +37,4 @@ its backend.
 
 For more information on Pacemaker in general, see the
 http://clusterlabs.org/doc/[Pacemaker documentation] at `clusterlabs.org`.
-
-For details on command line usage, see the link:/man[Manual].
 

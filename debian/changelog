@@ -1,3 +1,81 @@
+crmsh (2.3.2-4~bpo8+1) jessie-backports; urgency=medium
+
+  * Rebuild for jessie-backports.
+  * debian/tests/utils.sh: Update for dpkg behavior on jessie.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 07 Jun 2017 12:31:52 +0200
+
+crmsh (2.3.2-4) unstable; urgency=medium
+
+  * Remove uninstall file list
+
+ -- Valentin Vidic <Valentin.Vidic@CARNet.hr>  Mon, 19 Dec 2016 10:45:25 +0100
+
+crmsh (2.3.2-3) unstable; urgency=medium
+
+  * Make crm.8.html generation reproducible
+  * Cleanup debian/rules
+
+ -- Valentin Vidic <Valentin.Vidic@CARNet.hr>  Mon, 12 Dec 2016 10:46:36 +0100
+
+crmsh (2.3.2-2) unstable; urgency=medium
+
+  [ Valentin Vidic ]
+  * Use https for Vcs-Browser link (lintian fix)
+  * Update debian/copyright for moved files (lintian fix)
+  * crmsh: Change Architecture to all
+  * Drop unused libraries from build-depends
+  * Make generated documentation reproducible
+  * Remove unused packages from Build-Depends
+  * Fix crm manpage spelling
+  * crmsh-doc: add Multi-Arch: foreign
+  * d/tests: add basic crm node tests
+  * Patch scripts in utils to work on Debian
+  * d/tests: add tests for package management scripts
+  * Add patch to make 'cluster init' work on Debian
+  * Add python-parallax to Depends (Closes: #819545)
+  * Add patch to fix crm history on Debian systems
+
+  [ Christoph Berg ]
+  * Remove Martin and myself from Uploaders.
+
+ -- Valentin Vidic <Valentin.Vidic@CARNet.hr>  Sun, 04 Dec 2016 18:57:50 +0100
+
+crmsh (2.3.2-1) unstable; urgency=medium
+
+  [ Christoph Berg ]
+  * Fix changelog for previous upload, d/tests got lost.
+
+  [ Arturo Borrero Gonzalez ]
+  * Refresh 0004-Fix-privacy-breach-generic-caused-by-footer-template.patch
+    patch
+
+  [ Valentin Vidic ]
+  * Imported upstream version 2.3.2 (Closes: #815823, #815346)
+  * crm report: add gawk to Depends
+  * crm report: upstream fix for dash (Closes: #772269)
+  * Add myself to Uploaders list
+
+ -- Valentin Vidic <Valentin.Vidic@CARNet.hr>  Thu, 03 Nov 2016 10:20:56 +0100
+
+crmsh (2.2.1-1) unstable; urgency=medium
+
+  [ Adrian Vondendriesch ]
+  * New upstream release
+  * patches:
+    - drop 0001-Remove-AM_CONDITIONAL-for-UNAME_IS_DEBIAN.patch
+    - drop 0002-Remove-fix-for-Debian.patch
+  * Add myself to uploaders.
+  * Bump standars version.
+
+  [ Arturo Borrero Gonzalez ]
+  * d/tests: add basic crm and pacemaker tests
+    Check that the crm utility can run without issues, locating all of the
+    libraries it needs, and check the integration between crmsh and pacemaker
+    (and corosync). We build a cluster and then add a basic IP resource to it.
+
+ -- Adrian Vondendriesch <adrian.vondendriesch@credativ.de>  Tue, 03 May 2016 20:05:28 +0200
+
 crmsh (2.2.0-1~bpo8+1) jessie-backports; urgency=medium
 
   * Rebuild for jessie-backports.

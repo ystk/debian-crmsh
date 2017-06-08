@@ -1,0 +1,71 @@
+Description: Fix detection of cluster events
+ hb_report looks at /var/log/messages for cluster events by default.
+ On Debian systems this file only contains kernel messages so we use
+ /var/log/syslog instead.
+ .
+ Since the pacemaker looging moved to /var/log/pacemaker.log rather
+ than syslog, only this new file contains info on transitions so
+ use it instead of standard syslog messaging.
+Author: Valentin Vidic <Valentin.Vidic@CARNet.hr>
+Bug: https://github.com/ClusterLabs/crmsh/issues/169
+Last-Update: 2016-12-04
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/hb_report/hb_report.in
++++ b/hb_report/hb_report.in
+@@ -70,7 +70,7 @@
+ 	-X ssh-options: extra ssh(1) options
+ 	-l file: log file
+ 	-E file: extra logs to collect; this option is additive
+-	         (dflt: /var/log/messages)
++	         (dflt: /var/log/syslog)
+ 	-s     : sanitize the PE and CIB files
+ 	-p patt: regular expression to match variables containing sensitive data;
+ 	         this option is additive (dflt: "passw.*")
+@@ -78,7 +78,7 @@
+ 	         this option is additive (dflt: $LOG_PATTERNS)
+ 	-e prog: your favourite editor
+ 	-Q     : don't run resource intensive operations (speed up)
+-	-M     : don't collect extra logs (/var/log/messages)
++	-M     : don't collect extra logs (/var/log/syslog)
+ 	-D     : don't invoke editor to write description
+ 	-Z     : if destination directories exist, remove them instead of exiting
+ 	         (this is default for CTS)
+@@ -99,7 +99,7 @@
+ 	  preferred
+ 	. we try to figure where is the logfile; if we can't, please
+ 	  clue us in ('-l')
+-	. we collect only one logfile and /var/log/messages; if you
++	. we collect only one logfile and /var/log/syslog; if you
+ 	  have more than one logfile, then use '-E' option to supply
+ 	  as many as you want ('-M' empties the list)
+ 
+@@ -121,7 +121,7 @@
+ 	  case the support may be lacking as well. The logs and the
+ 	  crm_mon, ccm_tool, and crm_verify output are *not* sanitized.
+ 
+-	  Additional system logs (/var/log/messages) are collected in
++	  Additional system logs (/var/log/syslog) are collected in
+ 	  order to have a more complete report. If you don't want that
+ 	  specify -M.
+ 
+@@ -153,7 +153,7 @@
+ 	# logs to collect in addition
+ 	# NB: they all have to be in syslog format
+ 	#
+-	EXTRA_LOGS="/var/log/messages /var/log/pacemaker.log"
++	EXTRA_LOGS="/var/log/syslog /var/log/pacemaker.log"
+ 	PCMK_LOG="/var/log/pacemaker.log"
+ 	# used only by the master
+ 	NO_SSH=""
+--- a/crmsh/history.py
++++ b/crmsh/history.py
+@@ -18,7 +18,7 @@
+ from .msg import common_debug, common_warn, common_err, common_error, common_info, warn_once
+ 
+ 
+-_LOG_FILES = ("messages", "ha-log.txt", "ha-log", "cluster-log.txt", "journal.log", "pacemaker.log")
++_LOG_FILES = ("pacemaker.log", "syslog", "ha-log.txt", "ha-log", "cluster-log.txt", "journal.log")
+ 
+ 
+ #

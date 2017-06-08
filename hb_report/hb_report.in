@@ -25,7 +25,7 @@ LOGD_CF=`findlogdcf @sysconfdir@ $HA_DIR`
 export LOGD_CF
 
 SSH_PASSWORD_NODES=""
-: ${SSH_OPTS="-o StrictHostKeyChecking=no -o EscapeChar=none"}
+: ${SSH_OPTS="-o StrictHostKeyChecking=no -o EscapeChar=none -o ConnectTimeout=15"}
 LOG_PATTERNS="CRIT: ERROR:"
 # PEINPUTS_PATT="peng.*PEngine Input stored"
 
@@ -304,14 +304,23 @@ findlog() {
 		return
 	fi
 
-	if [ -f "$WORKDIR/$JOURNAL_F" ]; then
-		echo $WORKDIR/$JOURNAL_F
-		return
-	fi
+	if [ -n "$EXTRA_LOGS" ]; then
+		for l in $EXTRA_LOGS; do
+			if [ -f "$l" ] && [ "$l" != "$PCMK_LOG" ]; then
+				echo $l
+				return
+			fi
+		done
 
-	if [ -f "$PCMK_LOG" ]; then
-		echo $PCMK_LOG
-		return
+		if [ -f "$WORKDIR/$JOURNAL_F" ]; then
+			echo $WORKDIR/$JOURNAL_F
+			return
+		fi
+
+		if [ -f "$PCMK_LOG" ]; then
+			echo $PCMK_LOG
+			return
+		fi
 	fi
 
 	echo ${HA_DEBUGFILE:-$HA_LOGFILE}
@@ -533,7 +542,6 @@ FROM_TIME=$FROM_TIME
 TO_TIME=$TO_TIME
 USER_NODES="$USER_NODES"
 NODES="$NODES"
-MASTER_NODE="$MASTER_NODE"
 HA_LOG=$HA_LOG
 UNIQUE_MSG=$UNIQUE_MSG
 SANITIZE="$SANITIZE"
@@ -555,9 +563,6 @@ is_collector() {
 is_node() {
 	test "$THIS_IS_NODE"
 }
-is_master() {
-	! is_collector && test "$WE" = "$MASTER_NODE"
-}
 start_slave_collector() {
 	local node=$1
 
@@ -566,9 +571,8 @@ start_slave_collector() {
 		debug "running: $LOCAL_SUDO hb_report __slave"
 		$LOCAL_SUDO ${HA_NOARCHBIN}/hb_report __slave
 	else
-		debug "running: ssh $SSH_OPTS $node \"$SUDO hb_report __slave"
-		ssh $SSH_OPTS $node \
-			"$SUDO ${HA_NOARCHBIN}/hb_report __slave"
+		debug "running: ssh $SSH_OPTS $node \"$SUDO ${HA_NOARCHBIN}/hb_report __slave\""
+		ssh $SSH_OPTS $node "$SUDO ${HA_NOARCHBIN}/hb_report __slave"
 	fi | (cd $WORKDIR && tar xf -)
 }
 
@@ -745,6 +749,7 @@ sys_info() {
 	${HA_NOARCHBIN}/hb_report -V # our info
 	echo "resource-agents: `grep 'Build version:' @OCF_ROOT_DIR@/lib/heartbeat/ocf-shellfuncs`"
 	crm_info
+	booth --version
 	pkg_versions $PACKAGES
 	skip_lvl 1 || verify_packages $PACKAGES
 	echo "Platform: `uname`"
@@ -975,7 +980,9 @@ events() {
 	if [ -f $destdir/$HALOG_F ]; then
 		events_all $destdir/$HALOG_F > $destdir/events.txt
 		for n in $NODES; do
-			awk "\$4==\"$n\"" $destdir/events.txt > $destdir/$n/events.txt
+			if [ -d "$destdir/$n" ]; then
+				awk "\$4==\"$n\"" $destdir/events.txt > $destdir/$n/events.txt
+			fi
 		done
 	else
 		for n in $NODES; do
@@ -1052,8 +1059,8 @@ getlog() {
 	local outf
 	outf=$WORKDIR/$HALOG_F
 
-	# collect journal from systemd
-	collect_journal $FROM_TIME $TO_TIME $WORKDIR/$JOURNAL_F
+	# collect journal from systemd unless -M was passed
+	[ -n "$EXTRA_LOGS" ] && collect_journal $FROM_TIME $TO_TIME $WORKDIR/$JOURNAL_F
 
 	if [ "$HA_LOG" ]; then  # log provided by the user?
 		[ -f "$HA_LOG" ] || {  # not present
@@ -1111,7 +1118,7 @@ collect_journal() {
 			warning "$outf already exists"
 		fi
 		debug "journalctl from: '$1' until: '$2' from_time '$from_time' to_time: '$to_time' > $outf"
-		journalctl --since "$from_time" --until "$to_time" --no-pager | tail -n +2 > $outf
+		journalctl -o short-iso --since "$from_time" --until "$to_time" --no-pager | tail -n +2 > $outf
 	fi
 }
 #
@@ -1159,8 +1166,15 @@ finalword() {
 	else
 		echo "The report is saved in $DESTDIR/$DEST"
 	fi
+	echo "Report timespan: $(time2str "$FROM_TIME") - $(time2str "$TO_TIME")"
 	echo " "
 	echo "Thank you for taking time to create this report."
+}
+
+check_if_log_is_empty() {
+	if ! find "$1" -iname $HALOG_F | grep -q .; then
+		warning "Report contains no logs; did you get the right timeframe?"
+	fi
 }
 
 [ $# -eq 0 ] && usage
@@ -1283,6 +1297,7 @@ pacemaker-pygui pacemaker-pymgmt pymgmt-client
 openais libopenais2 libopenais3 corosync libcorosync4
 resource-agents cluster-glue libglue2 ldirectord libqb0
 heartbeat heartbeat-common heartbeat-resources libheartbeat2
+booth
 ocfs2-tools ocfs2-tools-o2cb ocfs2console
 ocfs2-kmp-default ocfs2-kmp-pae ocfs2-kmp-xen ocfs2-kmp-debug ocfs2-kmp-trace
 drbd drbd-kmp-xen drbd-kmp-pae drbd-kmp-default drbd-kmp-debug drbd-kmp-trace
@@ -1358,7 +1373,6 @@ export CONFIGURATIONS
 
 THIS_IS_NODE=""
 if ! is_collector; then
-	MASTER_NODE=$WE
 	NODES=`getnodes`
 	debug "nodes: `echo $NODES`"
 fi
@@ -1415,13 +1429,13 @@ fi
 # part 4: find the logs and cut out the segment for the period
 #
 
-# if the master is also a node, getlog is going to be invoked
-# from the collector
-(is_master && is_node) ||
-	getlog
+is_node && getlog
 
-if ! is_collector; then
-	for node in $NODES; do
+#
+# Start slave collectors
+#
+collect_for_nodes() {
+	for node in "$@"; do
 		if node_needs_pwd $node; then
 			info "Please provide password for `say_ssh_user` at $node"
 			info "Note that collecting data will take a while."
@@ -1431,6 +1445,14 @@ if ! is_collector; then
 			SLAVEPIDS="$SLAVEPIDS $!"
 		fi
 	done
+}
+
+if ! is_collector; then
+	if [ -z "$NO_SSH" ]; then
+		collect_for_nodes $NODES
+	elif is_node; then
+		collect_for_nodes "$WE"
+	fi
 fi
 
 #
@@ -1448,6 +1470,7 @@ else
 	fi
 	analyze $WORKDIR > $WORKDIR/$ANALYSIS_F &
 	events $WORKDIR &
+	check_if_log_is_empty $WORKDIR
 	mktemplate > $WORKDIR/$DESCRIPTION_F
 	[ "$NO_DESCRIPTION" ] || {
 		echo press enter to edit the problem description...

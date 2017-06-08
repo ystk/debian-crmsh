@@ -2,49 +2,39 @@ Source: crmsh
 Section: admin
 Priority: extra
 Maintainer: Debian HA Maintainers <debian-ha-maintainers@lists.alioth.debian.org>
-Uploaders: Martin Loschwitz <madkiss@debian.org>,
+Uploaders:
  Richard B Winters <rik@mmogp.com>,
- Christoph Berg <myon@debian.org>
+ Adrian Vondendriesch <adrian.vondendriesch@credativ.de>,
+ Valentin Vidic <Valentin.Vidic@CARNet.hr>
 Build-Depends: debhelper (>= 9.0.0),
  asciidoc,
- autotools-dev,
- cluster-glue-dev,
  dh-autoreconf,
  dh-python,
  docbook-xml,
  docbook-xsl,
- libcib-dev (>= 1.1.12),
- libcrmcluster-dev (>= 1.1.12),
- libcrmcommon-dev (>= 1.1.12),
- libcrmservice-dev (>= 1.1.12),
- liblrm2-dev (>= 1.0.12~),
- liblrmd-dev (>= 1.1.12),
- libpengine-dev (>= 1.1.12),
- libpils2-dev (>= 1.0.12~),
- libplumb2-dev (>= 1.0.12~),
- libplumbgpl2-dev (>= 1.0.12~),
- libstonith1-dev (>= 1.0.12~),
- libstonithd-dev (>= 1.1.14),
+ dos2unix,
  libxml2-utils,
  pkg-config,
  python-all (>= 2.6.6-3~),
- python-all-dev,
  python-dateutil,
+ python-pygments,
  python-setuptools,
  xsltproc
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 Homepage: http://crmsh.github.io/
 Vcs-Git: https://alioth.debian.org/anonscm/git/debian-ha/crmsh.git
-Vcs-Browser: http://anonscm.debian.org/cgit/debian-ha/crmsh.git
+Vcs-Browser: https://anonscm.debian.org/cgit/debian-ha/crmsh.git
 
 Package: crmsh
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends},
  ${python:Depends},
  ${misc:Depends},
+ gawk,
  pacemaker-cli-utils,
  python2.7 (>=2.7.9),
  python-lxml,
+ python-parallax,
  python-yaml
 Recommends: pacemaker (>= 1.1.12)
 Replaces: pacemaker (<< 1.1.12)
@@ -61,6 +51,7 @@ Description: CRM shell for the pacemaker cluster manager
 Package: crmsh-doc
 Section: doc
 Architecture: all
+Multi-Arch: foreign
 Depends: ${misc:Depends}
 Description: crmsh HTML Documentation
  The crm shell is an advanced command-line interface for High-Availability

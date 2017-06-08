@@ -34,9 +34,10 @@ Copyright: (c) 2008-2015 Upstream Authors (From AUTHORS)
            Yuusuke IIDA <iidayuus[at]intellilink[dot]co[dot]jp>
 License: GPL-2+
 
-Files: modules/crm_pssh.py
+Files: crmsh/crm_pssh.py
 Copyright: 2003-2008, Brent N. Chun
            2009 Andrew McNabb
+           2011 Dejan Muhamedagic
 License: GPL-2+
 
 Files: contrib/bash_completion.sh
@@ -45,8 +46,8 @@ Copyright: 2013 Kristoffer Gronlund
            2009-2010, Bash Completion Maintainers
 License: GPL-2+
 
-Files: modules/ordereddict.py
-       modules/orderedset.py
+Files: crmsh/ordereddict.py
+       crmsh/orderedset.py
 Copyright: 2009 Raymond Hettinger
 License: Expat
 

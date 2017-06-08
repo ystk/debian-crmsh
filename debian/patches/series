@@ -1,6 +1,10 @@
-0001-Remove-AM_CONDITIONAL-for-UNAME_IS_DEBIAN.patch
-0002-Remove-fix-for-Debian.patch
 0003-Add-remote-resource-to-local-cache.patch
 0004-Fix-privacy-breach-generic-caused-by-footer-template.patch
 0005-Fix-privacy-breach-generic-caused-by-atom-xml-templa.patch
 0006-Fix-privacy-breach-generic-caused-by-youtube-iframe.patch
+0007-pygmentize-lexer.patch
+0008-Fix-crm-report-for-dash.patch
+0009-Fix-spelling-in-man-crm.patch
+0010-Fix-package-management.patch
+0011-Fix-scripts-init.patch
+0012-Fix-crm-history.patch

@@ -1,6 +1,7 @@
 *.pyc
 *~
 #*.*#
+.#*
 doc/website-v1/gen
 Makefile.in
 autom4te.cache
@@ -12,3 +13,9 @@ patches/*
 .project
 .settings
 .pydevproject
+
+contrib/build/
+contrib/dist/
+contrib/pygments_crmsh_lexers.egg-info/
+
+.tox/
